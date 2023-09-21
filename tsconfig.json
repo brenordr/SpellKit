@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "./lib/core",
+    "rootDir": "./lib",
     "outDir": "./dist",
     "lib": ["ESNext"],
     "module": "esnext",

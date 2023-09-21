@@ -2,7 +2,7 @@
   "name": "spellkit",
   "version": "0.0.2",
   "module": "dist/src/index.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/types/core/index.d.ts",
   "type": "module",
   "scripts": {
     "bundle": "bun build ./lib/core/index.ts --outdir ./dist/src --minify --external react --spliting",
