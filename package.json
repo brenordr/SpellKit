@@ -7,6 +7,7 @@
   "scripts": {
     "bundle": "bun build ./src/index.ts --outdir ./dist/src --minify --external react --spliting",
     "types": "tsc  --declaration --emitDeclarationOnly --outDir dist/types",
+    "test": "bun test",
     "build": "bun run bundle && bun run types",
     "prepublish": "bun run build"
   },
