@@ -54,6 +54,7 @@ export function create<T>(initialValue: T): Store<T> {
       fn(value);
       return subscribe(fn);
     },
+
     unwrap: () => value,
 
     ...svelteTrait,

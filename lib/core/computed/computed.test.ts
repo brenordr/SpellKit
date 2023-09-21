@@ -1,7 +1,7 @@
 import { describe, expect, it, mock } from "bun:test";
 
-import { computed } from "./computed/computed";
-import { create } from "./create/create";
+import { create } from "../create/create";
+import { computed } from "./computed";
 
 describe("computed", () => {
   it("computes value based on parent states", () => {
@@ -72,15 +72,19 @@ describe("computed", () => {
     const mockFn = mock(() => {});
 
     const computedValue = computed(a1, a2, (v1, v2) => v1 + v2);
-
     computedValue.subscribe(mockFn);
 
-    a1.publish(2);
     expect(mockFn).toHaveBeenCalled();
 
-    computedValue.close();
+    a1.publish(2);
+    expect(mockFn).toHaveBeenCalledTimes(2);
 
+    computedValue.close();
     a2.publish("x");
-    expect(mockFn).toHaveBeenCalledTimes(1);
+
+    expect(mockFn).toHaveBeenCalledTimes(2);
+    a1.publish(3);
+
+    expect(mockFn).toHaveBeenCalledTimes(2);
   });
 });
