@@ -70,7 +70,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           git_hash=$(git rev-parse --short HEAD)
-          npm version prerelease --preid="next-${git_hash}" --no-git-tag-version
+          base_version=${{ env.LATEST_VERSION }}
+          npm version "$base_version-next.$git_hash" --no-git-tag-version
           npm publish --tag next
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
@@ -78,7 +79,8 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/rc/')
         run: |
           git_hash=$(git rev-parse --short HEAD)
-          npm version prerelease --preid="rc-${git_hash}" --no-git-tag-version
+          base_version=${{ env.LATEST_VERSION }}
+          npm version "$base_version-rc.$git_hash" --no-git-tag-version
           npm publish --tag rc
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
