@@ -5,6 +5,11 @@ export interface Computed<T> extends Omit<Store<T>, keyof Publishable<T>> {}
 
 export function computed<T, U, V>(
   a1: Store<T> | Computed<T>,
+  fn: (v1: T) => V
+): Computed<V>;
+
+export function computed<T, U, V>(
+  a1: Store<T> | Computed<T>,
   a2: Store<U> | Computed<U>,
   fn: (v1: T, v2: U) => V
 ): Computed<V>;

@@ -1,10 +1,29 @@
-import { channel } from "../channel/channel";
-import { Publishable, Subscribable, Unwrappable } from "../types";
+import { Channel, channel } from "../channel/channel";
+import { Unwrappable } from "../types";
 
-export interface Store<T>
-  extends Publishable<T>,
-    Subscribable<T>,
-    Unwrappable<T> {}
+export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {
+  set: (value: T) => void;
+  update: (updater: (currentValue: T) => T) => void;
+}
+
+export const svelteTrait = {
+  update(this: Store<any>, updater: (currentValue: any) => any) {
+    const value = this.unwrap();
+    const newValue = updater(value);
+    this.publish(newValue);
+  },
+
+  set(this: Store<any>, value: any) {
+    this.publish(value);
+  },
+};
+
+export const promiseLikeTrait = {
+  then(this: Store<any>, onfulfilled: any, onrejected: any) {
+    onfulfilled(this.unwrap());
+    return this;
+  },
+};
 
 /**
  * Creates a new store (extends channel) with an initial value and optional actions.
@@ -21,13 +40,24 @@ export function create<T>(initialValue: T): Store<T> {
   const innerChannel = channel<T>();
   let value = initialValue;
 
-  innerChannel.subscribe((newValue) => {
-    value = newValue;
-  });
+  const { publish, subscribe, ...innerChannelFns } = innerChannel;
 
   const store: Store<T> = {
-    ...innerChannel,
+    ...innerChannelFns,
+
+    publish: (newValue) => {
+      value = newValue;
+      publish(newValue);
+    },
+
+    subscribe: (fn) => {
+      fn(value);
+      return subscribe(fn);
+    },
     unwrap: () => value,
+
+    ...svelteTrait,
+    ...promiseLikeTrait,
   };
 
   return store as Store<T>;

@@ -1,6 +1,6 @@
-# Rune v0.1
+# SpellKit
 
-ReactiveStore is a lightweight state management library designed to bring reactivity to your applications. By using modern JavaScript features like ES6 Proxies, ReactiveStore allows you to seamlessly interact with your state, abstracting away the complexities of manual state management.
+SpellKit is a lightweight state management library designed to bring reactivity to your applications. By using modern JavaScript features like ES6 Proxies, SpellKit allows you to seamlessly interact with your state, abstracting away the complexities of manual state management.
 
 ## 🌟 Benefits:
 
@@ -15,7 +15,7 @@ ReactiveStore is a lightweight state management library designed to bring reacti
 
 ## 🛣 Roadmap:
 
-As we continue to enhance ReactiveStore, here are some features we're excited to bring in the upcoming versions:
+As we continue to enhance SpellKit, here are some features we're excited to bring in the upcoming versions:
 
 1. **Middlewares**: Introduce middleware support to intercept and augment the store's operations.
 2. **DevTools Integration**: Connect with popular browser DevTools for better debugging and state visualization.
@@ -31,12 +31,8 @@ We welcome contributions from the community! Whether it's a bug report, a new fe
 
 ## 📖 License:
 
-(Your license here, e.g., MIT, Apache, etc.)
+MIT
 
 ---
 
-Thank you for considering ReactiveStore for your project! We're excited to see what you build with it. If you have any questions or feedback, please don't hesitate to reach out or open an issue on our GitHub repository.
-
----
-
-Note: You can expand on each section, provide more detailed examples, and add links to relevant resources or the repository itself. This is a basic template to get you started!
+Thank you for considering SpellKit for your project! We're excited to see what you build with it. If you have any questions or feedback, please don't hesitate to reach out or open an issue on our GitHub repository.

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Store } from "./create/create";
-import { proxy } from "./proxy";
+import { proxy } from "./proxy/proxy";
 
 /**
  * React hook to interact with a given state. It provides reactivity to state changes

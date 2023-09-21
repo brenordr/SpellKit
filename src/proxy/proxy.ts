@@ -1,4 +1,4 @@
-import { Store } from "./create/create";
+import { Store } from "../create/create";
 
 /**
  * Creates a proxy object for a given store. Reading properties from the proxy

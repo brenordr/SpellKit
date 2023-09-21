@@ -13,7 +13,10 @@ export interface Channel<T> extends Publishable<T>, Subscribable<T> {
  * @returns {Channel<T>} An object containing methods to `publish` values and `subscribe` to changes.
  */
 export const channel = <T>(): Channel<T> => {
-  const subscribers: Array<(value: T) => void> = [];
+  // const subscribers: Array<(value: T) => void> = [];
+
+  const subscribers = new Set<(value: T) => void>();
+
   let closed = false;
 
   return {
@@ -30,19 +33,16 @@ export const channel = <T>(): Channel<T> => {
         throw new Error(`Cannot subscribe to a closed channel`);
       }
 
-      subscribers.push(fn);
+      subscribers.add(fn);
 
       return () => {
-        const index = subscribers.indexOf(fn);
-        if (index !== -1) {
-          subscribers.splice(index, 1);
-        }
+        subscribers.delete(fn);
       };
     },
 
     close: () => {
       closed = true;
-      subscribers.length = 0; // Clear the subscribers
+      subscribers.clear();
     },
 
     [Symbol.dispose]() {

@@ -12,13 +12,13 @@ type StoreWithActions<T, A extends Actions<T>> = Store<T> & {
   [K in keyof A]: (...args: Parameters<A[K]>) => void;
 };
 
-export function action<T, A extends Actions<T>>(
+export function actions<T, A extends Actions<T>>(
   store: Store<T>,
-  actions: A
+  options: A
 ): StoreWithActions<T, A> {
   const newStore = { ...store };
 
-  for (const [actionName, generator] of Object.entries(actions)) {
+  for (const [actionName, generator] of Object.entries(options)) {
     (newStore as any)[actionName] = (...args: any[]) => {
       const action = generator(...args);
       const currentValue = store.unwrap();

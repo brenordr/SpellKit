@@ -65,4 +65,22 @@ describe("computed", () => {
     darkMode.toggle();
     expect(lightMode.unwrap()).toBe(false);
   });
+
+  it("can be closed preventing further updates", () => {
+    const a1 = create<number>(0);
+    const a2 = create<string>("0");
+    const mockFn = mock(() => {});
+
+    const computedValue = computed(a1, a2, (v1, v2) => v1 + v2);
+
+    computedValue.subscribe(mockFn);
+
+    a1.publish(2);
+    expect(mockFn).toHaveBeenCalled();
+
+    computedValue.close();
+
+    a2.publish("x");
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
 });

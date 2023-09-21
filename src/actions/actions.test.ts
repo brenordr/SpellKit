@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import { create } from "../create/create";
-import { action } from "./action"; // Replace with actual import
+import { actions } from "./actions"; // Replace with actual import
 
-describe("action", () => {
+describe("actions", () => {
   it("should allow actions that modify the store", () => {
     const store = create(0);
-    const storeWithActions = action(store, {
+    const storeWithActions = actions(store, {
       increment: () => (value) => value + 1,
       decrement: () => (value) => value - 1,
     });
@@ -19,7 +19,7 @@ describe("action", () => {
 
   it("should allow actions with arguments", () => {
     const store = create(0);
-    const storeWithActions = action(store, {
+    const storeWithActions = actions(store, {
       add: (amount: number) => (value) => value + amount,
     });
 
@@ -32,7 +32,7 @@ describe("action", () => {
 
   it("should not affect the original store object", () => {
     const store = create(0);
-    const storeWithActions = action(store, {
+    const storeWithActions = actions(store, {
       increment: () => (value) => value + 1,
     });
 
@@ -43,7 +43,7 @@ describe("action", () => {
 
   it("should support multiple actions", () => {
     const store = create(0);
-    const storeWithActions = action(store, {
+    const storeWithActions = actions(store, {
       increment: () => (value) => value + 1,
       multiply: (factor: number) => (value) => value * factor,
     });
