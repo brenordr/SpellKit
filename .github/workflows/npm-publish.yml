@@ -66,24 +66,27 @@ jobs:
           npm publish --tag dev
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+
       - name: Publish Main Branch to NPM
         if: github.ref == 'refs/heads/main'
         run: |
           git_hash=$(git rev-parse --short HEAD)
-          base_version=${{ env.LATEST_VERSION }}
+          base_version=$(echo ${{ env.LATEST_VERSION }} | awk -F. '{$NF++; print $1 "." $2 "." $3}')
           npm version "$base_version-next.$git_hash" --no-git-tag-version
           npm publish --tag next
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+
       - name: Publish RC Branch to NPM
         if: startsWith(github.ref, 'refs/heads/rc/')
         run: |
           git_hash=$(git rev-parse --short HEAD)
-          base_version=${{ env.LATEST_VERSION }}
+          base_version=$(echo ${{ env.LATEST_VERSION }} | awk -F. '{$NF++; print $1 "." $2 "." $3}')
           npm version "$base_version-rc.$git_hash" --no-git-tag-version
           npm publish --tag rc
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+
       - name: Publish Release to NPM
         if: github.event_name == 'release'
         run: |
