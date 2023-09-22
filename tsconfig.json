@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": "./lib",
     "outDir": "./dist",
-    "lib": ["ESNext"],
+    "lib": ["dom", "ESNext"],
     "module": "esnext",
     "target": "esnext",
     "moduleResolution": "bundler",
@@ -19,6 +19,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "types": [
+      "web",
       "bun-types" // add Bun global
     ]
   }
