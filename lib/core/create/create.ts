@@ -1,10 +1,16 @@
 import { Channel, channel } from "../channel/channel";
 import { Unwrappable } from "../types";
 
-export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {
-  set: (value: T) => void;
+interface SvelteTrait<T> {
   update: (updater: (currentValue: T) => T) => void;
+  set: (value: T) => void;
 }
+
+export interface Store<T>
+  extends Channel<T>,
+    Unwrappable<T>,
+    PromiseLike<T>,
+    SvelteTrait<T> {}
 
 export const svelteTrait = {
   update(this: Store<any>, updater: (currentValue: any) => any) {
@@ -24,6 +30,16 @@ export const promiseLikeTrait = {
     return this;
   },
 };
+
+// export const esGetSetTrait = {
+//   get(this: Store<any>) {
+//     return this.unwrap();
+//   },
+
+//   set(this: Store<any>, value: any) {
+//     this.publish(value);
+//   },
+// };
 
 /**
  * Creates a new store (extends channel) with an initial value and optional actions.
