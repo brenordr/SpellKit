@@ -31,16 +31,6 @@ export const promiseLikeTrait = {
   },
 };
 
-// export const esGetSetTrait = {
-//   get(this: Store<any>) {
-//     return this.unwrap();
-//   },
-
-//   set(this: Store<any>, value: any) {
-//     this.publish(value);
-//   },
-// };
-
 /**
  * Creates a new store (extends channel) with an initial value and optional actions.
  *
