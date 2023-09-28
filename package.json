@@ -32,7 +32,9 @@
   "sideEffects": false,
   "devDependencies": {
     "bun-types": "1.0.3",
-    "@types/web": "^0.0.115"
+    "@types/web": "^0.0.115",
+    "react": "^18.2.0",
+    "@types/react": "^18.2.23"
   },
   "peerDependencies": {
     "typescript": ">=5.2.0",
