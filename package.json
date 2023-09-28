@@ -31,14 +31,13 @@
   ],
   "sideEffects": false,
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "1.0.3",
+    "@types/web": "^0.0.115"
   },
   "peerDependencies": {
-    "typescript": "^5.2.0"
+    "typescript": ">=5.2.0",
+    "@types/react": ">=18.0.0",
+    "react": ">=18.0.0"
   },
-  "dependencies": {
-    "@types/react": "^18.2.21",
-    "@types/web": "^0.0.115",
-    "react": "^18.2.0"
-  }
+  "dependencies": {}
 }
