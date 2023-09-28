@@ -13,12 +13,12 @@ interface PersistOptions<T> {
   /**
    * The key to use when persisting the state.
    */
-  key: string;
+  key?: string;
 
   /**
    * The storage to use when persisting the state.
    */
-  storage: Storage;
+  storage?: Storage;
 
   /**
    * A function that transforms the state before persisting.
