@@ -10,11 +10,11 @@ import { Subscribable, Unwrappable } from "../core/types";
  * @param {Store<T>} state - The state to bind to.
  *
  */
-export function useStore<T>(
-  state: Subscribable<T> & Unwrappable<T>
-): [T, (newValue: T) => void] {
+export function useStore<T>(state: Subscribable<T> & Unwrappable<T>): T {
   // Local state to hold the current value of the store
-  const [value, setValue] = useState<T>(state.unwrap());
+
+  const currState = state.unwrap();
+  const [value, setValue] = useState<T>(currState);
 
   useEffect(() => {
     // Subscribe to changes in the store
@@ -26,8 +26,8 @@ export function useStore<T>(
     return () => {
       unsubscribe();
     };
-  }, [state]);
+  }, [state, currState]);
 
   // Return a proxy that interacts with the store
-  return [value, setValue];
+  return value;
 }
