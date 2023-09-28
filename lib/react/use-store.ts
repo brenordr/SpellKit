@@ -11,23 +11,23 @@ import { Subscribable, Unwrappable } from "../core/types";
  *
  */
 export function useStore<T>(state: Subscribable<T> & Unwrappable<T>): T {
-  // Local state to hold the current value of the store
-
-  const currState = state.unwrap();
-  const [value, setValue] = useState<T>(currState);
+  const [value, setValue] = useState<T>(state.unwrap());
 
   useEffect(() => {
-    // Subscribe to changes in the store
     const unsubscribe = state.subscribe((newValue) => {
-      setValue(newValue);
+      setValue((prevValue) => {
+        // Add equality check or deep equality if necessary
+        if (prevValue !== newValue) {
+          return newValue;
+        }
+        return prevValue;
+      });
     });
 
-    // Cleanup the subscription on component unmount
     return () => {
       unsubscribe();
     };
-  }, [state, currState]);
+  }, [state]);
 
-  // Return a proxy that interacts with the store
   return value;
 }
