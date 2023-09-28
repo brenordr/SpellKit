@@ -17,6 +17,7 @@
       "types": "./dist/types/middleware/index.d.ts"
     }
   },
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "bundle": "bun hack/build.ts",
