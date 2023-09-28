@@ -38,7 +38,7 @@ export function persist<T>(
     storage = local(),
     serialize = JSON.stringify,
     deserialize = JSON.parse,
-  }: PersistOptions<T>
+  }: PersistOptions<T> = {}
 ): Store<T> {
   const value = storage.getItem(key);
   if (value !== null) {
