@@ -1,4 +1,4 @@
-import { Store } from "../create/create";
+import { Store } from "../../core/create/create";
 
 export interface Storage {
   getItem(key: string): string | null;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Store } from "./create/create";
+import { Subscribable, Unwrappable } from "../core/types";
 
 /**
  * React hook to interact with a given state. It provides reactivity to state changes
@@ -10,7 +10,9 @@ import { Store } from "./create/create";
  * @param {Store<T>} state - The state to bind to.
  *
  */
-export function useStore<T>(state: Store<T>): [T, (newValue: T) => void] {
+export function useStore<T>(
+  state: Subscribable<T> & Unwrappable<T>
+): [T, (newValue: T) => void] {
   // Local state to hold the current value of the store
   const [value, setValue] = useState<T>(state.unwrap());
 

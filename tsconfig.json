@@ -1,4 +1,6 @@
 {
+  "include": ["lib/**/*"],
+  "exclude": ["hack/**/*"],
   "compilerOptions": {
     "rootDir": "./lib",
     "outDir": "./dist",

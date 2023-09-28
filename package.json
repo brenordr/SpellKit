@@ -1,18 +1,26 @@
 {
   "name": "spellkit",
   "version": "0.0.0",
-  "module": "dist/src/index.js",
+  "module": "dist/esm/core/index.js",
   "types": "dist/types/core/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
+      "import": "./dist/esm/core/index.js",
       "types": "./dist/types/core/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/esm/react/index.js",
+      "types": "./dist/types/react/index.d.ts"
+    },
+    "./middleware": {
+      "import": "./dist/esm/middleware/index.js",
+      "types": "./dist/types/middleware/index.d.ts"
     }
   },
   "type": "module",
   "scripts": {
-    "bundle": "bun build ./lib/core/index.ts --outdir ./dist/src --minify --external react --spliting",
-    "types": "tsc  --declaration --emitDeclarationOnly --outDir dist/types",
+    "bundle": "bun hack/build.ts",
+    "types": "tsc --declaration --emitDeclarationOnly --outDir dist/types",
     "test": "bun test",
     "build": "bun run bundle && bun run types",
     "prepublish": "bun run build"
