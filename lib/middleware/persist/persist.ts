@@ -33,18 +33,13 @@ interface PersistOptions<T> {
 
 export function persist<T>(
   store: Store<T>,
-  options: PersistOptions<T> = {
-    key: "store",
-    storage: local(),
-  }
-): Store<T> {
-  const {
-    key,
-    storage,
+  {
+    key = "store",
+    storage = local(),
     serialize = JSON.stringify,
     deserialize = JSON.parse,
-  } = options;
-
+  }: PersistOptions<T>
+): Store<T> {
   const value = storage.getItem(key);
   if (value !== null) {
     store.set(deserialize(value));

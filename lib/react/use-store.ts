@@ -3,12 +3,13 @@ import { Subscribable, Unwrappable } from "../core/types";
 
 /**
  * React hook to interact with a given state. It provides reactivity to state changes
- * and returns a proxy object that can be used to read and update the state.
+ * and returns the value of the state.
  *
  * @template T - The type of the state object.
  *
  * @param {Store<T>} state - The state to bind to.
  *
+ * @returns {T} The value of the state.
  */
 export function useStore<T>(state: Subscribable<T> & Unwrappable<T>): T {
   const [value, setValue] = useState<T>(state.unwrap());
