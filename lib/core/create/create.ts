@@ -6,11 +6,11 @@ interface SvelteTrait<T> {
   set: (value: T) => void;
 }
 
-export interface Store<T>
-  extends Channel<T>,
-    Unwrappable<T>,
-    PromiseLike<T>,
-    SvelteTrait<T> {}
+export type Store<T, X = {}> = Channel<T> &
+  Unwrappable<T> &
+  PromiseLike<T> &
+  SvelteTrait<T> &
+  X;
 
 export const svelteTrait = {
   update(this: Store<any>, updater: (currentValue: any) => any) {

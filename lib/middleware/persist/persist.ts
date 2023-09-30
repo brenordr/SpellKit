@@ -32,48 +32,37 @@ interface PersistOptions<T> {
 }
 
 export function persist<T, X = {}>(
-  store: Store<T> & X,
+  store: Store<T, X>,
   {
     key = "store",
     storage = LocalStorage(),
     serialize = JSON.stringify,
     deserialize = JSON.parse,
   }: PersistOptions<T> = {}
-): Store<T> &
-  X & {
-    isHydrated: () => boolean;
-  } {
-  let isHydrated = false;
+): Store<T, { hydrate: () => void; isHydrated: () => boolean }> & X {
+  let hydrated = false;
 
-  const hydrate = async () => {
+  function hydrate() {
     const value = storage.getItem(key);
     if (value !== null) {
       store.publish(deserialize(value));
     }
-    isHydrated = true;
-  };
-
-  const persistedStore = {
-    ...store,
-    isHydrated: () => isHydrated,
-  };
-
-  store.subscribe((state) => {
-    if (!isHydrated) return;
-    storage.setItem(key, serialize(state));
-  });
-
-  if (typeof window !== "undefined") {
-    window.addEventListener("load", hydrate);
-
-    if (storage.subscribe) {
-      storage.subscribe(key, (state) => {
-        store.publish(deserialize(state));
-      });
-    }
+    hydrated = true;
   }
 
-  return persistedStore;
+  function isHydrated() {
+    return hydrated;
+  }
+
+  return {
+    ...store,
+    hydrate,
+    isHydrated,
+    publish: (newValue: T) => {
+      store.publish(newValue);
+      storage.setItem(key, serialize(newValue));
+    },
+  };
 }
 
 export const MemoryStorage = (): Storage => {

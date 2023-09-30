@@ -1,26 +1,30 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { Subscribable, Unwrappable } from "../core/types";
 
 type StoreType<T> = Subscribable<T> & Unwrappable<T>;
-type HydratableStoreType<T> = StoreType<T> & {
+type StoreWithHydration<T> = StoreType<T> & {
+  hydrate: () => void;
   isHydrated: () => boolean;
 };
 
-export function useStore<T>(state: HydratableStoreType<T>): [T, boolean];
-export function useStore<T>(state: StoreType<T>): [T];
+export function useStore<T>(state: StoreWithHydration<T>): [T, boolean];
+export function useStore<T>(state: StoreType<T>): T;
 export function useStore<T>(
-  state: StoreType<T> & Partial<HydratableStoreType<T>>
-): [T] | [T, boolean] {
+  state: StoreType<T> | StoreWithHydration<T>
+): T | [T, boolean] {
+  let isHydrated = useRef(false).current;
   const storeState = useSyncExternalStore(
     state.subscribe,
     state.unwrap,
     state.unwrap
   );
 
-  if ("isHydrated" in state && typeof state.isHydrated === "function") {
-    const isHydrated = state.isHydrated();
-    return [storeState, isHydrated];
-  }
+  useEffect(() => {
+    if ("hydrate" in state && "isHydrated" in state) {
+      state.hydrate();
+      isHydrated = state.isHydrated();
+    }
+  }, [state]);
 
-  return [storeState];
+  return "isHydrated" in state ? [storeState, isHydrated] : storeState;
 }
