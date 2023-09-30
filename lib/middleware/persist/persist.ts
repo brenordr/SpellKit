@@ -64,13 +64,13 @@ export function persist<T, X = {}>(
   });
 
   if (typeof window !== "undefined") {
-    // Client-side only
+    window.addEventListener("load", hydrate);
+
     if (storage.subscribe) {
       storage.subscribe(key, (state) => {
         store.publish(deserialize(state));
       });
     }
-    setTimeout(() => hydrate(), 0);
   }
 
   return persistedStore;
