@@ -78,38 +78,3 @@ export function computed<V>(...args: any[]): Computed<V> {
 
   return store;
 }
-
-interface Node {
-  id: any;
-  data: any;
-}
-
-interface Edge {
-  id: any;
-  data: any;
-  form: any;
-  to: any;
-}
-
-interface Graph {
-  nodes: Node[];
-  edges: Edge[];
-}
-
-interface Tree {}
-
-const nodeStore = create<Node[]>([]);
-const edgeStore = create<Edge[]>([]);
-
-const treeStore = computed(
-  nodeStore,
-  edgeStore,
-  (nodes, edges) => ({} as Tree)
-);
-
-const toServer = async () => {
-  fetch("http://localhost:3000", {
-    method: "POST",
-    body: JSON.stringify(treeStore.unwrap()),
-  });
-};

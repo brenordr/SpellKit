@@ -35,12 +35,13 @@ export function persist<T>(
   store: Store<T>,
   {
     key = "store",
-    storage = local(),
+    storage = LocalStorage(),
     serialize = JSON.stringify,
     deserialize = JSON.parse,
   }: PersistOptions<T> = {}
 ): Store<T> {
   const value = storage.getItem(key);
+
   if (value !== null) {
     store.set(deserialize(value));
   }
@@ -58,7 +59,7 @@ export function persist<T>(
   return store;
 }
 
-export const memory = (): Storage => {
+export const MemoryStorage = (): Storage => {
   const store: Record<string, string> = {};
 
   return {
@@ -72,9 +73,9 @@ export const memory = (): Storage => {
   };
 };
 
-export const local = (): Storage => {
+export const LocalStorage = (): Storage => {
   if (typeof window === "undefined") {
-    return memory();
+    return MemoryStorage();
   }
 
   return {
@@ -95,7 +96,7 @@ export const local = (): Storage => {
 
 interface SessionStorageOptions {}
 
-export const session = (options: SessionStorageOptions): Storage => {
+export const SessionStorage = (options: SessionStorageOptions): Storage => {
   return {
     getItem: (key) => window.sessionStorage.getItem(key),
     setItem: (key, value) => sessionStorage.setItem(key, value),
@@ -110,7 +111,7 @@ interface CookieStorageOptions {
   secure?: boolean;
 }
 
-export const cookie = (options: CookieStorageOptions): Storage => {
+export const CookieStorage = (options: CookieStorageOptions): Storage => {
   return {
     getItem: (key) => {
       const value = document.cookie
@@ -138,7 +139,7 @@ export const cookie = (options: CookieStorageOptions): Storage => {
   };
 };
 
-export const url = (): Storage => {
+export const URLQueryStorage = (): Storage => {
   const params = new URLSearchParams(window.location.search);
 
   return {
