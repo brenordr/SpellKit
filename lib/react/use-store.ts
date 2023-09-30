@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Subscribable, Unwrappable } from "../core/types";
 
 /**
@@ -16,12 +16,14 @@ export function useStore<T>(state: Subscribable<T> & Unwrappable<T>): T {
 
   useEffect(() => {
     const unsubscribe = state.subscribe((newValue) => {
-      setValue((prevValue) => {
-        // Add equality check or deep equality if necessary
-        if (prevValue !== newValue) {
-          return newValue;
-        }
-        return prevValue;
+      startTransition(() => {
+        setValue((prevValue) => {
+          // Add equality check or deep equality if necessary
+          if (prevValue !== newValue) {
+            return newValue;
+          }
+          return prevValue;
+        });
       });
     });
 
