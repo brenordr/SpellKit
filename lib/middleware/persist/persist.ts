@@ -31,15 +31,18 @@ interface PersistOptions<T> {
   deserialize?: (state: string) => T;
 }
 
-export function persist<T>(
-  store: Store<T>,
+export function persist<T, X = {}>(
+  store: Store<T> & X,
   {
     key = "store",
     storage = LocalStorage(),
     serialize = JSON.stringify,
     deserialize = JSON.parse,
   }: PersistOptions<T> = {}
-): Store<T> & { isHydrated: () => boolean } {
+): Store<T> &
+  X & {
+    isHydrated: () => boolean;
+  } {
   let isHydrated = false;
 
   const hydrate = async () => {
@@ -55,20 +58,19 @@ export function persist<T>(
     isHydrated: () => isHydrated,
   };
 
-  if (typeof window !== "undefined") {
-    // Client-side only
-    setTimeout(() => hydrate(), 0);
-  }
-
   store.subscribe((state) => {
     if (!isHydrated) return;
     storage.setItem(key, serialize(state));
   });
 
-  if (storage.subscribe) {
-    storage.subscribe(key, (state) => {
-      store.publish(deserialize(state));
-    });
+  if (typeof window !== "undefined") {
+    // Client-side only
+    if (storage.subscribe) {
+      storage.subscribe(key, (state) => {
+        store.publish(deserialize(state));
+      });
+    }
+    setTimeout(() => hydrate(), 0);
   }
 
   return persistedStore;
