@@ -39,24 +39,39 @@ export function persist<T>(
     serialize = JSON.stringify,
     deserialize = JSON.parse,
   }: PersistOptions<T> = {}
-): Store<T> {
-  const value = storage.getItem(key);
+): Store<T> & { isHydrated: () => boolean } {
+  let isHydrated = false;
 
-  if (value !== null) {
-    store.set(deserialize(value));
+  const hydrate = async () => {
+    const value = storage.getItem(key);
+    if (value !== null) {
+      store.publish(deserialize(value));
+    }
+    isHydrated = true;
+  };
+
+  const persistedStore = {
+    ...store,
+    isHydrated: () => isHydrated,
+  };
+
+  if (typeof window !== "undefined") {
+    // Client-side only
+    setTimeout(() => hydrate(), 0);
   }
 
   store.subscribe((state) => {
+    if (!isHydrated) return;
     storage.setItem(key, serialize(state));
   });
 
   if (storage.subscribe) {
     storage.subscribe(key, (state) => {
-      store.set(deserialize(state));
+      store.publish(deserialize(state));
     });
   }
 
-  return store;
+  return persistedStore;
 }
 
 export const MemoryStorage = (): Storage => {
