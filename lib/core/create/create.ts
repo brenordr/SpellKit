@@ -1,71 +1,106 @@
 import { Channel, channel } from "../channel/channel";
 import { Unwrappable } from "../types";
 
-interface SvelteTrait<T> {
-  update: (updater: (currentValue: T) => T) => void;
-  set: (value: T) => void;
-}
-
-export type Store<T, X = {}> = Channel<T> &
-  Unwrappable<T> &
-  PromiseLike<T> &
-  SvelteTrait<T> &
+/**
+ * Store type definition.
+ *
+ * @template T The type of values that the store holds.
+ * @template X Optional extension type.
+ */
+export type Store<T, X = {}> = Channel<T | PromiseLike<T>> &
+  Unwrappable<T | PromiseLike<T>> &
   X;
 
-export const svelteTrait = {
-  update(this: Store<any>, updater: (currentValue: any) => any) {
-    const value = this.unwrap();
-    const newValue = updater(value);
-    this.publish(newValue);
-  },
-
-  set(this: Store<any>, value: any) {
-    this.publish(value);
-  },
-};
-
+/**
+ * Promise-like methods as a trait.
+ */
 export const promiseLikeTrait = {
-  then(this: Store<any>, onfulfilled: any, onrejected: any) {
-    onfulfilled(this.unwrap());
-    return this;
+  then<TResult1 = any, TResult2 = never>(
+    this: AsyncStore<any>,
+    onfulfilled?: ((value: any) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
+  ): PromiseLike<TResult1 | TResult2> {
+    const currentValue = this.unwrap();
+    return Promise.resolve(currentValue);
   },
 };
+
+export type AsyncStore<T> = Store<T> & PromiseLike<T>;
+
+type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
 
 /**
- * Creates a new store (extends channel) with an initial value and optional actions.
+ * Creates a new store with an optional initial value.
  *
- * @template T - The type of values that the store will hold.
- * @template A - The type of actions that the store will contain.
+ * @template T - The type of values the store holds.
+ * @param {T | (() => Promise<T>)} [init] - Optional initial value.
+ * @returns {Store<T> | AsyncStore<T>} A store object.
  *
- * @param {T} initialValue - The initial value for the store.
+ * @example
+ * // Create a basic store with an initial value
+ * const myStore = create(10);
  *
- * @returns {Store<T>} An object containing methods to `publish` new values, `subscribe` to changes,
- *                     `unwrap` to retrieve the current value.
+ * @example
+ * // Create an asynchronous store
+ * const asyncStore = create(() => new Promise(resolve => setTimeout(() => resolve(10), 1000)));
  */
-export function create<T>(initialValue: T): Store<T> {
-  const innerChannel = channel<T>();
-  let value = initialValue;
+export function create<T>(init?: T): Store<T>;
+export function create<T>(init?: () => Promise<T>): AsyncStore<T>;
+export function create<T>(
+  init?: T | (() => Promise<T>)
+): Store<T> | AsyncStore<T> {
+  let value: T;
+  let resolveHydration: ResolveHydrationType<T> = () => {};
 
+  const hydrationPromise = new Promise<T>((resolve) => {
+    resolveHydration = resolve;
+  });
+
+  const innerChannel = channel<T>();
   const { publish, subscribe, ...innerChannelFns } = innerChannel;
 
-  const store: Store<T> = {
+  const subscribeWrapper = (fn: (value: T) => void, value: T) => {
+    fn(value);
+    return subscribe(fn);
+  };
+
+  const baseStore: Store<T> = {
     ...innerChannelFns,
-
-    publish: (newValue) => {
-      value = newValue;
-      publish(newValue);
+    publish: (newValue: T | PromiseLike<T>) => {
+      if (typeof newValue === "object" && newValue && "then" in newValue) {
+        (newValue as PromiseLike<T>).then((resolvedValue: T) => {
+          value = resolvedValue;
+          publish(resolvedValue);
+        });
+      } else {
+        value = newValue as T;
+        publish(newValue as T);
+      }
     },
-
-    subscribe: (fn) => {
-      fn(value);
-      return subscribe(fn);
-    },
-
+    subscribe: (fn) => subscribeWrapper(fn, value),
     unwrap: () => value,
-
-    ...svelteTrait,
     ...promiseLikeTrait,
   };
 
-  return store as Store<T>;
+  const asyncStore: AsyncStore<T> = {
+    ...baseStore,
+    then: (onfulfilled, onrejected) => {
+      return hydrationPromise.then(onfulfilled, onrejected);
+    },
+  };
+
+  if (typeof init === "function") {
+    const initFn = init as () => Promise<T>;
+    initFn().then((initialValue: T) => {
+      asyncStore.publish(initialValue);
+      resolveHydration(initialValue);
+    });
+    return asyncStore;
+  } else {
+    if (init !== undefined) {
+      value = init;
+      resolveHydration(init);
+    }
+    return baseStore;
+  }
 }

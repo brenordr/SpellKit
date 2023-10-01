@@ -54,4 +54,50 @@ describe("create", () => {
     expect(mockFn).toHaveBeenCalledTimes(1);
     expect(value).toBe(42);
   });
+
+  it("handles initial value from async function", async () => {
+    const testStore = create(() => Promise.resolve(42));
+    let value = 0;
+
+    const mockFn = mock((v) => {
+      value = v;
+    });
+
+    testStore.subscribe(mockFn);
+
+    // Wait for Promise to resolve
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(mockFn).toHaveBeenCalled();
+    expect(value).toBe(42);
+  });
+
+  it("can unwrap value after async resolution", async () => {
+    const testStore = create(() => Promise.resolve(42));
+
+    // Wait for Promise to resolve
+    await testStore;
+
+    expect(testStore.unwrap()).toBe(42);
+  });
+
+  it.todo("should block updates when async store is closed", async () => {
+    const testStore = create(() => Promise.resolve(42));
+    let value = 0;
+
+    const mockFn = mock((v) => {
+      value = v;
+    });
+
+    testStore.subscribe(mockFn);
+
+    // Close the store before async initialization finishes
+    testStore.close();
+
+    // Explicitly await for testStore promise to resolve.
+    await testStore;
+
+    expect(mockFn).not.toHaveBeenCalled();
+    expect(value).toBe(0);
+  });
 });

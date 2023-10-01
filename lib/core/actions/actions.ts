@@ -1,4 +1,5 @@
 import { Store } from "../create/create";
+import { isPromiseLike } from "../utils";
 
 type Action<T> = (currentValue: T, ...args: any[]) => T;
 
@@ -22,8 +23,16 @@ export function actions<T, A extends Actions<T>>(
     (newStore as any)[actionName] = (...args: any[]) => {
       const action = generator(...args);
       const currentValue = store.unwrap();
-      const newValue = action(currentValue);
-      store.publish(newValue);
+
+      if (isPromiseLike(currentValue)) {
+        currentValue.then((resolvedValue) => {
+          const newValue = action(resolvedValue);
+          store.publish(newValue);
+        });
+      } else {
+        const newValue = action(currentValue);
+        store.publish(newValue);
+      }
     };
   }
 
