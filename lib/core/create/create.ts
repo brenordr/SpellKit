@@ -13,7 +13,7 @@ export interface AsyncStore<T>
 }
 
 type Actions<T> = {
-  [K in keyof T]: (...args: any[]) => void;
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? T[K] : never;
 };
 
 /**
