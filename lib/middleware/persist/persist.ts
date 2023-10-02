@@ -1,4 +1,4 @@
-import { AsyncStore } from "../../core/create/create";
+import { AsyncStore, Store, create } from "../../core/create/create";
 
 export interface Storage {
   getItem(key: string): string | null;
@@ -32,7 +32,7 @@ interface PersistOptions<T> {
 }
 
 export function persist<T>(
-  store: AsyncStore<T>,
+  store: Store<T>,
   options: PersistOptions<T> = {}
 ): AsyncStore<T> {
   const {
@@ -42,39 +42,34 @@ export function persist<T>(
     deserialize = JSON.parse,
   } = options;
 
-  // Initial hydration
-  const init = async () => {
+  const asyncStore = create<T>(async () => {
     const value = storage.getItem(key);
     if (value !== null) {
-      store.publish(deserialize(value));
+      return deserialize(value);
     }
-  };
 
-  // Initiate hydration and then resolve
-  init();
-
-  const originalPublish = store.publish;
-
-  // Override publish to include persistence
-  store.publish = (newValue: T | PromiseLike<T>) => {
-    if (newValue && typeof newValue === "object" && "then" in newValue) {
-      (newValue as PromiseLike<T>).then((resolvedValue: T) => {
-        originalPublish(resolvedValue);
-        storage.setItem(key, serialize(resolvedValue));
-      });
-    } else {
-      originalPublish(newValue);
-      storage.setItem(key, serialize(newValue));
-    }
-  };
+    return store.unwrap();
+  });
 
   if (storage.subscribe) {
     storage.subscribe(key, (state) => {
       store.publish(deserialize(state));
+      asyncStore.publish(deserialize(state));
     });
   }
 
-  return store;
+  return {
+    ...asyncStore,
+    publish: (newValue: T) => {
+      const serializedValue = serialize(newValue);
+      storage.setItem(key, serializedValue);
+      store.publish(newValue);
+    },
+    subscribe: (fn) => {
+      const unsubscribe = store.subscribe(fn);
+      return unsubscribe;
+    },
+  };
 }
 
 export const MemoryStorage = (): Storage => {

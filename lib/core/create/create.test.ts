@@ -24,12 +24,11 @@ describe("create", () => {
 
   it("toggle a boolean using a custom action", () => {
     // Example usage
-    const lightSwitch = {
-      ...create(false),
+    const lightSwitch = create(false, {
       toggle: () => {
         lightSwitch.publish(!lightSwitch.unwrap());
       },
-    };
+    });
 
     lightSwitch.toggle();
     expect(lightSwitch.unwrap()).toBe(true);
@@ -56,7 +55,7 @@ describe("create", () => {
   });
 
   it("handles initial value from async function", async () => {
-    const testStore = create(() => Promise.resolve(42));
+    const testStore = create(async () => 42);
     let value = 0;
 
     const mockFn = mock((v) => {
@@ -73,7 +72,7 @@ describe("create", () => {
   });
 
   it("can unwrap value after async resolution", async () => {
-    const testStore = create(() => Promise.resolve(42));
+    const testStore = create(async () => 42);
 
     // Wait for Promise to resolve
     await testStore;
@@ -82,7 +81,7 @@ describe("create", () => {
   });
 
   it.todo("should block updates when async store is closed", async () => {
-    const testStore = create(() => Promise.resolve(42));
+    const testStore = create(async () => 42);
     let value = 0;
 
     const mockFn = mock((v) => {

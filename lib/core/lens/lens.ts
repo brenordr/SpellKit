@@ -1,4 +1,4 @@
-import { AsyncStore, Store, promiseLikeTrait } from "../create/create";
+import { Store, promiseLikeTrait } from "../create/create";
 import { Unsubscriber } from "../types";
 import { isPromiseLike } from "../utils";
 
@@ -37,7 +37,7 @@ function unwrapState<T>(
  * @returns A new lensed SpellKit store
  */
 export function lens<T, P>(
-  store: Store<T> | AsyncStore<T>,
+  store: Store<T>,
   options: LensOptions<T, P>
 ): Store<P> {
   const { get, set } = options;
@@ -57,7 +57,7 @@ export function lens<T, P>(
    * Publish a new value to the lensed store.
    * @param newPart - The new part value or a promise of it
    */
-  function publish(newPart: P | PromiseLike<P>): void {
+  function publish(newPart: P): void {
     unwrapState(newPart, (resolvedPart) => {
       unwrapState(store.unwrap(), (resolvedState) => {
         const newState = set(resolvedState, resolvedPart);
@@ -70,11 +70,9 @@ export function lens<T, P>(
    * Unwrap the current state of the lensed store.
    * @returns The current state or a promise of it
    */
-  function unwrap(): P | PromiseLike<P> {
+  function unwrap(): P {
     const currentState = store.unwrap();
-    return isPromiseLike(currentState)
-      ? currentState.then((resolvedState) => get(resolvedState))
-      : get(currentState);
+    return get(currentState);
   }
 
   return {
