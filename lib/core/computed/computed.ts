@@ -1,40 +1,37 @@
-import { Store, create } from "../create/create";
+import { StoreLike, create } from "../create/create";
 import { Publishable } from "../types";
 
-export interface Computed<T> extends Omit<Store<T>, keyof Publishable<T>> {}
+export interface Computed<T> extends Omit<StoreLike<T>, keyof Publishable<T>> {}
+
+export function computed<T, V>(a1: StoreLike<T>, fn: (v1: T) => V): Computed<V>;
 
 export function computed<T, U, V>(
-  a1: Store<T> | Computed<T>,
-  fn: (v1: T) => V
-): Computed<V>;
-
-export function computed<T, U, V>(
-  a1: Store<T> | Computed<T>,
-  a2: Store<U> | Computed<U>,
+  a1: StoreLike<T>,
+  a2: StoreLike<U>,
   fn: (v1: T, v2: U) => V
 ): Computed<V>;
 
 export function computed<T, U, W, V>(
-  a1: Store<T> | Computed<T>,
-  a2: Store<U> | Computed<U>,
-  a3: Store<W> | Computed<W>,
+  a1: StoreLike<T>,
+  a2: StoreLike<U>,
+  a3: StoreLike<W>,
   fn: (v1: T, v2: U, v3: W) => V
 ): Computed<V>;
 
 export function computed<T, U, W, X, V>(
-  a1: Store<T> | Computed<T>,
-  a2: Store<U> | Computed<U>,
-  a3: Store<W> | Computed<W>,
-  a4: Store<X> | Computed<X>,
+  a1: StoreLike<T>,
+  a2: StoreLike<U>,
+  a3: StoreLike<W>,
+  a4: StoreLike<X>,
   fn: (v1: T, v2: U, v3: W, v4: X) => V
 ): Computed<V>;
 
 export function computed<T, U, W, X, Y, V>(
-  a1: Store<T> | Computed<T>,
-  a2: Store<U> | Computed<U>,
-  a3: Store<W> | Computed<W>,
-  a4: Store<X> | Computed<X>,
-  a5: Store<Y> | Computed<Y>,
+  a1: StoreLike<T>,
+  a2: StoreLike<U>,
+  a3: StoreLike<W>,
+  a4: StoreLike<X>,
+  a5: StoreLike<Y>,
   fn: (v1: T, v2: U, v3: W, v4: X, v5: Y) => V
 ): Computed<V>;
 
@@ -51,14 +48,12 @@ export function computed<T, U, W, X, Y, V>(
  *                         and `unwrap` to retrieve the current value.
  */
 export function computed<V>(...args: any[]): Computed<V> {
-  const stores: (Store<any> | Computed<any>)[] = args.slice(0, -1);
+  const stores: StoreLike<any>[] = args.slice(0, -1);
   const fn: (...values: any[]) => V = args[args.length - 1];
 
-  // Compute the initial value for the computed store
   const initialComputedValue = fn(...stores.map((store) => store.unwrap()));
   const computedStore = create<V>(initialComputedValue);
 
-  // The function to compute the value based on the current store of its dependencies
   const computeValue = () => {
     const values = stores.map((store) => store.unwrap());
     return fn(...values);
@@ -69,7 +64,6 @@ export function computed<V>(...args: any[]): Computed<V> {
     computedStore.publish(newValue);
   };
 
-  // Subscribe to all parent stores
   stores.forEach((store) => {
     store.subscribe(() => computeAndPublish());
   });

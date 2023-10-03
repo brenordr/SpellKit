@@ -4,16 +4,24 @@ import { actions } from "./actions"; // Replace with actual import
 
 describe("actions", () => {
   it("should allow actions that modify the store", () => {
-    const store = create(0);
-    const storeWithActions = actions(store, {
-      increment: () => (value) => value + 1,
-      decrement: () => (value) => value - 1,
+    const store = create(0, {
+      increment: () => {
+        store.publish(store.unwrap() + 1);
+      },
+      decrement: () => {
+        store.publish(store.unwrap() - 1);
+      },
     });
 
-    storeWithActions.increment();
+    // const storeWithActions = actions(store, {
+    //   increment: () => (value) => value + 1,
+    //   decrement: () => (value) => value - 1,
+    // });
+
+    store.increment();
     expect(store.unwrap()).toBe(1);
 
-    storeWithActions.decrement();
+    store.decrement();
     expect(store.unwrap()).toBe(0);
   });
 

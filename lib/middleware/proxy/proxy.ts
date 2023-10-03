@@ -1,4 +1,4 @@
-import { Store } from "../../core/create/create";
+import { StoreLike } from "../../core/create/create";
 
 /**
  * Creates a proxy object for a given store. Reading properties from the proxy
@@ -6,11 +6,11 @@ import { Store } from "../../core/create/create";
  *
  * @template T - The type of the store object.
  *
- * @param {Store<T>} store - The store to create a proxy for.
+ * @param {StoreLike<T>} store - The store to create a proxy for.
  *
  * @returns {T} A proxy object for the store.
  */
-export function proxy<T extends object>(store: Store<T>): T {
+export function proxy<T extends object>(store: StoreLike<T>): T {
   return new Proxy<T>({} as T, {
     get: (_, property) => {
       const value = store.unwrap();

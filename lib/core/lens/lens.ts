@@ -1,4 +1,4 @@
-import { Store, promiseLikeTrait } from "../create/create";
+import { StoreLike } from "../create/create";
 import { Unsubscriber } from "../types";
 import { isPromiseLike } from "../utils";
 
@@ -37,9 +37,9 @@ function unwrapState<T>(
  * @returns A new lensed SpellKit store
  */
 export function lens<T, P>(
-  store: Store<T>,
+  store: StoreLike<T>,
   options: LensOptions<T, P>
-): Store<P> {
+): StoreLike<P> {
   const { get, set } = options;
 
   /**
@@ -80,6 +80,5 @@ export function lens<T, P>(
     subscribe,
     publish,
     unwrap,
-    ...promiseLikeTrait,
   };
 }

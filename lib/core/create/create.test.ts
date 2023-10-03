@@ -72,6 +72,8 @@ describe("create", () => {
   });
 
   it("can unwrap value after async resolution", async () => {
+    // const testStore = create(async () => 42);
+
     const testStore = create(async () => 42);
 
     // Wait for Promise to resolve

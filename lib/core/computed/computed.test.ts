@@ -36,19 +36,17 @@ describe("computed", () => {
 
   it("toggle a derived boolean when parents call custom action", () => {
     // Example usage
-    const darkMode = {
-      ...create(false),
+    const darkMode = create(false, {
       toggle: () => {
         darkMode.publish(!darkMode.unwrap());
       },
-    };
+    });
 
-    const systemEnabled = {
-      ...create(false),
+    const systemEnabled = create(false, {
       toggle: () => {
         systemEnabled.publish(!systemEnabled.unwrap());
       },
-    };
+    });
 
     const lightMode = computed(darkMode, systemEnabled, (dark, system) => {
       return !dark && !system;

@@ -1,4 +1,4 @@
-import { Store } from "../create/create";
+import { StoreLike } from "../create/create";
 import { isPromiseLike } from "../utils";
 
 type Action<T> = (currentValue: T, ...args: any[]) => T;
@@ -9,12 +9,12 @@ type Actions<T> = {
   [actionName: string]: ActionGenerator<T>;
 };
 
-type StoreWithActions<T, A extends Actions<T>> = Store<T> & {
+type StoreWithActions<T, A extends Actions<T>> = StoreLike<T> & {
   [K in keyof A]: (...args: Parameters<A[K]>) => void;
 };
 
 export function actions<T, A extends Actions<T>>(
-  store: Store<T>,
+  store: StoreLike<T>,
   options: A
 ): StoreWithActions<T, A> {
   const newStore = { ...store };

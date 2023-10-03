@@ -1,12 +1,18 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { AsyncStore, SyncStore } from "../core/create/create";
+import { AsyncStore, Store } from "../core/create/create";
+import { Publishable } from "../core/types";
+import { isPromiseLike } from "../core/utils";
 
-type StoreType<T> = SyncStore<T> | AsyncStore<T>;
+type StoreType<T> = Store<T> | AsyncStore<T>;
 
-export function useStore<T>(state: AsyncStore<T>): [T, boolean];
-export function useStore<T>(state: SyncStore<T>): T;
+export function useStore<T>(
+  state: Omit<AsyncStore<T>, keyof Publishable<T>>
+): [T, boolean];
+export function useStore<T>(state: Omit<Store<T>, keyof Publishable<T>>): T;
 
-export function useStore<T>(state: StoreType<T>): T | [T, boolean] {
+export function useStore<T>(
+  state: Omit<StoreType<T>, keyof Publishable<T>>
+): T | [T, boolean] {
   let isHydrated = useRef(false).current;
   const storeState = useSyncExternalStore(
     state.subscribe,
@@ -15,7 +21,7 @@ export function useStore<T>(state: StoreType<T>): T | [T, boolean] {
   );
 
   useEffect(() => {
-    if (state.type === "async") {
+    if (isPromiseLike(state)) {
       state.then(() => {
         isHydrated = true;
       });
