@@ -1,7 +1,7 @@
 import { Channel, channel } from "../channel/channel";
 import { Unwrappable } from "../types";
 
-type Actions<T> = {
+export type Actions<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? T[K] : never;
 };
 
@@ -16,11 +16,11 @@ export interface AsyncStore<T> extends Store<T>, PromiseLike<T> {}
  */
 export type StoreLike<T, X = {}> = (AsyncStore<T> | Store<T>) & Actions<X>;
 
-type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
-
 export type ExtendedStore<T, X> = T extends (...args: any[]) => Promise<any>
   ? AsyncStore<T> & Actions<X>
   : Store<T> & Actions<X>;
+
+type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
 
 /**
  * Creates a new store with an optional initial value.
