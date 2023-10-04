@@ -16,23 +16,9 @@ export interface AsyncStore<T> extends Store<T>, PromiseLike<T> {}
  */
 export type StoreLike<T, X = {}> = (AsyncStore<T> | Store<T>) & Actions<X>;
 
-// /**
-//  * Promise-like methods as a trait.
-//  */
-// export const promiseLikeTrait = {
-//   then<F = any, R = never>(
-//     this: AsyncStore<any>,
-//     onfulfilled?: ((value: any) => F | PromiseLike<F>) | null,
-//     onrejected?: ((reason: any) => R | PromiseLike<R>) | null
-//   ): PromiseLike<F | R> {
-//     const currentValue = this.unwrap();
-//     return Promise.resolve(currentValue);
-//   },
-// };
-
 type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
 
-type ExtendedStore<T, X> = T extends (...args: any[]) => Promise<any>
+export type ExtendedStore<T, X> = T extends (...args: any[]) => Promise<any>
   ? AsyncStore<T> & Actions<X>
   : Store<T> & Actions<X>;
 
