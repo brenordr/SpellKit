@@ -1,4 +1,4 @@
-import { StoreLike } from "../create/create";
+import { StoreLike } from "../create";
 import { isPromiseLike } from "../utils";
 
 type Action<T> = (currentValue: T, ...args: any[]) => T;

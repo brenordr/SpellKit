@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
-import { channel } from "./channel";
+import { channel } from ".";
 
 describe("channel", () => {
   it("notifies all subscribers when a value is published", () => {

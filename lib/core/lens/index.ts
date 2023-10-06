@@ -1,5 +1,5 @@
-import { StoreLike } from "../create/create";
-import { Unsubscriber } from "../types";
+import { Unsubscriber } from "../@types";
+import { StoreLike } from "../create";
 import { isPromiseLike } from "../utils";
 
 /** Type definition for getting lensed part from the state */

@@ -1,4 +1,4 @@
-import { AsyncStore, StoreLike, create } from "../../core/create/create";
+import { AsyncStore, StoreLike, create } from "../../core/create";
 
 export interface Storage {
   getItem(key: string): string | null;

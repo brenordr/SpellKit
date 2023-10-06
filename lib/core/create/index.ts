@@ -1,5 +1,5 @@
-import { Channel, channel } from "../channel/channel";
-import { Unwrappable } from "../types";
+import { Unwrappable } from "../@types";
+import { Channel, channel } from "../channel";
 
 export type Actions<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? T[K] : never;

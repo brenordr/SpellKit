@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
-import { create } from "./create";
+import { create } from ".";
 
 describe("create", () => {
   it("can get and unwrap the initial value", () => {

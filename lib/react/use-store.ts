@@ -1,6 +1,6 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { AsyncStore, Store } from "../core/create/create";
-import { Publishable } from "../core/types";
+import { Publishable } from "../core/@types";
+import { AsyncStore, Store } from "../core/create";
 import { isPromiseLike } from "../core/utils";
 
 type StoreType<T> = Store<T> | AsyncStore<T>;

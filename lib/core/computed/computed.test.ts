@@ -1,7 +1,7 @@
 import { describe, expect, it, mock } from "bun:test";
 
-import { create } from "../create/create";
-import { computed } from "./computed";
+import { computed } from ".";
+import { create } from "../create";
 
 describe("computed", () => {
   it("computes value based on parent states", () => {

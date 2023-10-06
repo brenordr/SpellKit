@@ -1,2 +1,2 @@
-export * from "./persist/persist";
-export * from "./proxy/proxy";
+export * from "./persist";
+export * from "./proxy";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { create } from "../create/create";
-import { actions } from "./actions"; // Replace with actual import
+import { actions } from "."; // Replace with actual import
+import { create } from "../create";
 
 describe("actions", () => {
   it("should allow actions that modify the store", () => {

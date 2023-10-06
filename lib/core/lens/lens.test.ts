@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 
-import { create, StoreLike } from "../create/create";
-import { lens } from "./lens";
+import { lens } from ".";
+import { create, StoreLike } from "../create";
 
 describe("lens", () => {
   let store: StoreLike<{ name: string; age: number }>;

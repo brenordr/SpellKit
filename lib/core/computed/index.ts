@@ -1,5 +1,5 @@
-import { StoreLike, create } from "../create/create";
-import { Publishable } from "../types";
+import { Publishable } from "../@types";
+import { StoreLike, create } from "../create";
 
 export interface Computed<T> extends Omit<StoreLike<T>, keyof Publishable<T>> {}
 

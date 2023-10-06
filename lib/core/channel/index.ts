@@ -1,4 +1,4 @@
-import { Publishable, Subscribable } from "../types";
+import { Publishable, Subscribable } from "../@types";
 
 export interface Channel<T> extends Publishable<T>, Subscribable<T> {
   close: () => void;
