@@ -1,10 +1,10 @@
 import { Store } from "../store";
 
-type Action<T> = (...args: any[]) => T;
-type ActionsCreator<T, A extends { [key: string]: Action<T> }> = (
+export type Action<T> = (...args: any[]) => T;
+export type ActionsCreator<T, A extends { [key: string]: Action<T> }> = (
   unwrap: () => T
 ) => A;
-type Actions<T, A extends { [key: string]: Action<T> }> = {
+export type Actions<T, A extends { [key: string]: Action<T> }> = {
   [K in keyof A]: (...args: Parameters<A[K]>) => void;
 };
 
