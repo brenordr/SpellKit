@@ -1,4 +1,4 @@
-import { Store, StoreLike, create } from "../../core/store";
+import { Store, store } from "../../core/store";
 
 export interface Storage {
   getItem(key: string): string | null;
@@ -32,7 +32,7 @@ interface PersistOptions<T> {
 }
 
 export function persist<T>(
-  store: StoreLike<T>,
+  storeRef: Store<T>,
   options: PersistOptions<T> = {}
 ): Store<T> {
   const {
@@ -42,18 +42,18 @@ export function persist<T>(
     deserialize = JSON.parse,
   } = options;
 
-  const asyncStore = create<T>(async () => {
+  const asyncStore = store<T>(async () => {
     const value = storage.getItem(key);
     if (value !== null) {
       return deserialize(value);
     }
 
-    return store.unwrap();
+    return storeRef.unwrap();
   });
 
   if (storage.subscribe) {
     storage.subscribe(key, (state) => {
-      store.publish(deserialize(state));
+      storeRef.publish(deserialize(state));
       asyncStore.publish(deserialize(state));
     });
   }
@@ -63,10 +63,10 @@ export function persist<T>(
     publish: (newValue: T) => {
       const serializedValue = serialize(newValue);
       storage.setItem(key, serializedValue);
-      store.publish(newValue);
+      storeRef.publish(newValue);
     },
     subscribe: (fn) => {
-      const unsubscribe = store.subscribe(fn);
+      const unsubscribe = storeRef.subscribe(fn);
       return unsubscribe;
     },
   };
