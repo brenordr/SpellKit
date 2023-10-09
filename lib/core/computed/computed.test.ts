@@ -36,18 +36,15 @@ describe("computed", () => {
   });
 
   it("toggle a derived boolean when parents call custom action", () => {
-    // Example usage
-    const darkMode = actions(store(false), {
-      toggle: () => (value) => {
-        return !value;
-      },
-    });
+    const darkMode = store(false);
+    const darkModeActions = actions(darkMode, (unwrap) => ({
+      toggle: () => !unwrap(),
+    }));
 
-    const systemEnabled = actions(store(false), {
-      toggle: () => (value) => {
-        return !value;
-      },
-    });
+    const systemEnabled = store(false);
+    const systemEnabledActions = actions(systemEnabled, (unwrap) => ({
+      toggle: () => !unwrap(),
+    }));
 
     const lightMode = computed(darkMode, systemEnabled, (dark, system) => {
       return !dark && !system;
@@ -55,13 +52,13 @@ describe("computed", () => {
 
     expect(lightMode.unwrap()).toBe(true);
 
-    darkMode.toggle();
+    darkModeActions.toggle();
     expect(lightMode.unwrap()).toBe(false);
 
-    systemEnabled.toggle();
+    systemEnabledActions.toggle();
     expect(lightMode.unwrap()).toBe(false);
 
-    darkMode.toggle();
+    darkModeActions.toggle();
     expect(lightMode.unwrap()).toBe(false);
   });
 

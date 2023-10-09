@@ -58,4 +58,18 @@ describe("actions", () => {
     counterActions.multiply(5);
     expect(counter.unwrap()).toBe(5);
   });
+
+  it("toggle a boolean using a custom action", () => {
+    const lightSwitch = store(false);
+
+    const lightSwitchActions = actions(lightSwitch, (unwrap) => ({
+      toggle: () => !unwrap(),
+    }));
+
+    lightSwitchActions.toggle();
+    expect(lightSwitch.unwrap()).toBe(true);
+
+    lightSwitchActions.toggle();
+    expect(lightSwitch.unwrap()).toBe(false);
+  });
 });

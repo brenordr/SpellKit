@@ -1,6 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
 import { store } from ".";
-import { actions } from "..";
 
 describe("store", () => {
   it("can get and unwrap the initial value", () => {
@@ -21,20 +20,6 @@ describe("store", () => {
 
     expect(mockFn).toHaveBeenCalled();
     expect(value).toBe(100);
-  });
-
-  it("toggle a boolean using a custom action", () => {
-    // Example usage
-    const lightSwitch = actions(store(false), {
-      toggle: () => (value) => {
-        return !value;
-      },
-    });
-
-    lightSwitch.toggle();
-    expect(lightSwitch.unwrap()).toBe(true);
-    lightSwitch.toggle();
-    expect(lightSwitch.unwrap()).toBe(false);
   });
 
   it("should block updates when store is closed", () => {
