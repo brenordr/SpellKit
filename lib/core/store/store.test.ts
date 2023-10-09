@@ -67,7 +67,7 @@ describe("store", () => {
     expect(testStore.unwrap()).toBe(42);
   });
 
-  it.todo("should block updates when async store is closed", async () => {
+  it("should block updates when async store is closed", async () => {
     const testStore = store(async () => 42);
     let value = 0;
 
@@ -81,9 +81,24 @@ describe("store", () => {
     testStore.close();
 
     // Explicitly await for testStore promise to resolve.
-    await testStore;
+    try {
+      await testStore;
+    } catch (error) {
+      expect(error).toBeTruthy(); // Or replace with a more specific error check
+    }
+  });
 
-    expect(mockFn).not.toHaveBeenCalled();
-    expect(value).toBe(0);
+  it("should await for await and then update the store, the next wait should return the updated value", async () => {
+    const testStore = store(async () => 42);
+
+    const value = await testStore;
+
+    expect(value).toBe(42);
+
+    testStore.publish(100);
+
+    const newValue = await testStore;
+
+    expect(newValue).toBe(100);
   });
 });

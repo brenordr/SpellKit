@@ -59,7 +59,7 @@ describe("actions", () => {
     expect(counter.unwrap()).toBe(5);
   });
 
-  it("toggle a boolean using a custom action", () => {
+  it("toggle a boolean using a custom action", async () => {
     const lightSwitch = store(false);
 
     const lightSwitchActions = actions(lightSwitch, (unwrap) => ({
@@ -67,9 +67,9 @@ describe("actions", () => {
     }));
 
     lightSwitchActions.toggle();
-    expect(lightSwitch.unwrap()).toBe(true);
+    expect(await lightSwitch).toBe(true);
 
     lightSwitchActions.toggle();
-    expect(lightSwitch.unwrap()).toBe(false);
+    expect(await lightSwitch).toBe(false);
   });
 });

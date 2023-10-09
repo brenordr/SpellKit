@@ -10,6 +10,9 @@ export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
 
 type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
 
+export function store<T>(init: () => Promise<T>): Store<T>;
+export function store<T>(init: () => T): Store<T>;
+export function store<T>(init: T): Store<T>;
 /**
  * State type definition.
  *
@@ -27,6 +30,8 @@ type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
  */
 export function store<T>(init: T | (() => T) | (() => Promise<T>)): Store<T> {
   let value: T;
+  let resolved = false;
+
   let resolveHydration: ResolveHydrationType<T> = () => {};
 
   const hydrationPromise = new Promise<T>((resolve) => {
@@ -50,7 +55,15 @@ export function store<T>(init: T | (() => T) | (() => Promise<T>)): Store<T> {
     subscribe: (fn) => subscribeWrapper(fn),
     unwrap: () => value,
     then: (onfulfilled, onrejected) => {
-      return hydrationPromise.then(onfulfilled, onrejected);
+      if (!resolved) {
+        return hydrationPromise.then(onfulfilled, onrejected);
+      }
+
+      // TODO: This creates a fresh promise that returns the value. May not be ideal.
+      // we can probably just return the value directly?
+      return new Promise<T>((resolve) => {
+        resolve(value);
+      }).then(onfulfilled, onrejected);
     },
   };
 
@@ -59,10 +72,12 @@ export function store<T>(init: T | (() => T) | (() => Promise<T>)): Store<T> {
       initializer.then((initialValue) => {
         asyncStore.publish(initialValue);
         resolveHydration(initialValue);
+        resolved = true;
       });
     } else {
       asyncStore.publish(initializer);
       resolveHydration(initializer);
+      resolved = true;
     }
   };
 
