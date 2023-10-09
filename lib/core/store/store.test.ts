@@ -1,14 +1,15 @@
 import { describe, expect, it, mock } from "bun:test";
-import { create } from ".";
+import { store } from ".";
+import { actions } from "..";
 
-describe("create", () => {
+describe("store", () => {
   it("can get and unwrap the initial value", () => {
-    const testStore = create(42);
+    const testStore = store(42);
     expect(testStore.unwrap()).toBe(42);
   });
 
   it("notifies subscribers when a value is published", () => {
-    const testStore = create<number>(42);
+    const testStore = store<number>(42);
     let value = 0;
 
     const mockFn = mock((v) => {
@@ -24,21 +25,20 @@ describe("create", () => {
 
   it("toggle a boolean using a custom action", () => {
     // Example usage
-    const lightSwitch = create(false, {
-      toggle: () => {
-        lightSwitch.publish(!lightSwitch.unwrap());
+    const lightSwitch = actions(store(false), {
+      toggle: () => (value) => {
+        return !value;
       },
     });
 
     lightSwitch.toggle();
     expect(lightSwitch.unwrap()).toBe(true);
-
     lightSwitch.toggle();
     expect(lightSwitch.unwrap()).toBe(false);
   });
 
   it("should block updates when store is closed", () => {
-    const testStore = create<number>(42);
+    const testStore = store<number>(42);
     let value = 0;
 
     const mockFn = mock((v) => {
@@ -55,7 +55,7 @@ describe("create", () => {
   });
 
   it("handles initial value from async function", async () => {
-    const testStore = create(async () => 42);
+    const testStore = store(async () => 42);
     let value = 0;
 
     const mockFn = mock((v) => {
@@ -72,9 +72,9 @@ describe("create", () => {
   });
 
   it("can unwrap value after async resolution", async () => {
-    // const testStore = create(async () => 42);
+    // const testStore = store(async () => 42);
 
-    const testStore = create(async () => 42);
+    const testStore = store(async () => 42);
 
     // Wait for Promise to resolve
     await testStore;
@@ -83,7 +83,7 @@ describe("create", () => {
   });
 
   it.todo("should block updates when async store is closed", async () => {
-    const testStore = create(async () => 42);
+    const testStore = store(async () => 42);
     let value = 0;
 
     const mockFn = mock((v) => {

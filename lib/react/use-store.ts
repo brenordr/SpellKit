@@ -1,12 +1,12 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { Publishable } from "../core/@types";
-import { AsyncStore, Store } from "../core/create";
+import { Store } from "../core/store";
 import { isPromiseLike } from "../core/utils";
 
-type StoreType<T> = Store<T> | AsyncStore<T>;
+type StoreType<T> = Store<T> | Store<T>;
 
 export function useStore<T>(
-  state: Omit<AsyncStore<T>, keyof Publishable<T>>
+  state: Omit<Store<T>, keyof Publishable<T>>
 ): [T, boolean];
 export function useStore<T>(state: Omit<Store<T>, keyof Publishable<T>>): T;
 

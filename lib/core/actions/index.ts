@@ -1,34 +1,29 @@
-import { StoreLike } from "../create";
+import { Store } from "../store";
 import { isPromiseLike } from "../utils";
 
 type Action<T> = (currentValue: T, ...args: any[]) => T;
-
 type ActionGenerator<T> = (...args: any[]) => Action<T>;
+type Actions<T> = { [actionName: string]: ActionGenerator<T> };
 
-type Actions<T> = {
-  [actionName: string]: ActionGenerator<T>;
-};
-
-type StoreWithActions<T, A extends Actions<T>> = StoreLike<T> & {
+type StoreWithActions<T, A extends Actions<T>> = Store<T> & {
   [K in keyof A]: (...args: Parameters<A[K]>) => void;
 };
 
 export function actions<T, A extends Actions<T>>(
-  store: StoreLike<T>,
+  store: Store<T>,
   options: A
 ): StoreWithActions<T, A> {
-  const newStore = { ...store };
+  const actionHandlers: Partial<Record<keyof A, (...args: any[]) => void>> = {};
 
   for (const [actionName, generator] of Object.entries(options)) {
-    (newStore as any)[actionName] = (...args: any[]) => {
+    actionHandlers[actionName as keyof A] = async (...args: any[]) => {
       const action = generator(...args);
       const currentValue = store.unwrap();
 
       if (isPromiseLike(currentValue)) {
-        currentValue.then((resolvedValue) => {
-          const newValue = action(resolvedValue);
-          store.publish(newValue);
-        });
+        const resolvedValue = await currentValue;
+        const newValue = action(resolvedValue);
+        store.publish(newValue);
       } else {
         const newValue = action(currentValue);
         store.publish(newValue);
@@ -36,5 +31,5 @@ export function actions<T, A extends Actions<T>>(
     };
   }
 
-  return newStore as StoreWithActions<T, A>;
+  return { ...store, ...actionHandlers } as StoreWithActions<T, A>;
 }

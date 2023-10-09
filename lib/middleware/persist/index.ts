@@ -1,4 +1,4 @@
-import { AsyncStore, StoreLike, create } from "../../core/create";
+import { Store, StoreLike, create } from "../../core/store";
 
 export interface Storage {
   getItem(key: string): string | null;
@@ -34,7 +34,7 @@ interface PersistOptions<T> {
 export function persist<T>(
   store: StoreLike<T>,
   options: PersistOptions<T> = {}
-): AsyncStore<T> {
+): Store<T> {
   const {
     key = "store",
     storage = LocalStorage(),

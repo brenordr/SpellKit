@@ -1,4 +1,4 @@
-import { StoreLike } from "../../core/create";
+import { StoreLike } from "../../core/store";
 
 /**
  * Creates a proxy object for a given store. Reading properties from the proxy

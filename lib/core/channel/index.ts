@@ -2,7 +2,6 @@ import { Publishable, Subscribable } from "../@types";
 
 export interface Channel<T> extends Publishable<T>, Subscribable<T> {
   close: () => void;
-  [Symbol.dispose]: () => void;
 }
 
 /**
@@ -43,10 +42,6 @@ export const channel = <T>(): Channel<T> => {
     close: () => {
       closed = true;
       subscribers.clear();
-    },
-
-    [Symbol.dispose]() {
-      this.close();
     },
   };
 };

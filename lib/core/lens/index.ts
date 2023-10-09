@@ -1,5 +1,5 @@
 import { Unsubscriber } from "../@types";
-import { StoreLike } from "../create";
+import { Store } from "../store";
 import { isPromiseLike } from "../utils";
 
 /** Type definition for getting lensed part from the state */
@@ -36,10 +36,10 @@ function unwrapState<T>(
  * @param options - Options for how to get and set lensed parts of the state
  * @returns A new lensed SpellKit store
  */
-export function lens<T, P>(
-  store: StoreLike<T>,
+export function lens<T extends any, P>(
+  store: Store<T>,
   options: LensOptions<T, P>
-): StoreLike<P> {
+): Store<P> {
   const { get, set } = options;
 
   /**
@@ -80,5 +80,13 @@ export function lens<T, P>(
     subscribe,
     publish,
     unwrap,
+
+    then: (onfulfilled, onrejected) => {
+      const onfulfilledWrapper = onfulfilled
+        ? (value: T) => onfulfilled(get(value))
+        : undefined;
+
+      return store.then(onfulfilledWrapper, onrejected);
+    },
   };
 }

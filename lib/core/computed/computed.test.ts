@@ -1,12 +1,13 @@
 import { describe, expect, it, mock } from "bun:test";
 
 import { computed } from ".";
-import { create } from "../create";
+import { actions } from "..";
+import { store as create, store } from "../store";
 
 describe("computed", () => {
   it("computes value based on parent states", () => {
-    const a1 = create<number>(0);
-    const a2 = create<number>(0);
+    const a1 = create(0);
+    const a2 = create(0);
 
     const computedValue = computed(a1, a2, (v1, v2) => v1 + v2);
 
@@ -36,15 +37,15 @@ describe("computed", () => {
 
   it("toggle a derived boolean when parents call custom action", () => {
     // Example usage
-    const darkMode = create(false, {
-      toggle: () => {
-        darkMode.publish(!darkMode.unwrap());
+    const darkMode = actions(store(false), {
+      toggle: () => (value) => {
+        return !value;
       },
     });
 
-    const systemEnabled = create(false, {
-      toggle: () => {
-        systemEnabled.publish(!systemEnabled.unwrap());
+    const systemEnabled = actions(store(false), {
+      toggle: () => (value) => {
+        return !value;
       },
     });
 
