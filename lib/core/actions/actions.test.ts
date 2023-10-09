@@ -4,16 +4,10 @@ import { store } from "../store";
 
 describe("actions", () => {
   it("should allow actions that modify the store", () => {
-    const counter = actions(store(0), {
-      increment: () => (value) => value + 1,
-      decrement: () => (value) => value - 1,
-    });
-
-    // // @ts-nocheck
-    // const counter = actions(store(0), (get) => ({
-    //   increment: () => get().value++,
-    //   decrement: () => get().value--,
-    // }));
+    const counter = actions(store(0), (unwrap) => ({
+      increment: () => unwrap() + 1,
+      decrement: () => unwrap() - 1,
+    }));
 
     counter.increment();
     expect(counter.unwrap()).toBe(1);
@@ -23,9 +17,9 @@ describe("actions", () => {
   });
 
   it("should allow actions with arguments", () => {
-    const storeWithActions = actions(store(0), {
-      add: (amount: number) => (value) => value + amount,
-    });
+    const storeWithActions = actions(store(0), (unwrap) => ({
+      add: (amount: number) => unwrap() + amount,
+    }));
 
     storeWithActions.add(5);
     expect(storeWithActions.unwrap()).toBe(5);
@@ -35,20 +29,22 @@ describe("actions", () => {
   });
 
   it("should not affect the original store object", () => {
-    const storeWithActions = actions(store(0), {
-      increment: () => (value) => value + 1,
-    });
+    const counter = store(0);
+
+    const storeWithActions = actions(counter, (unwrap) => ({
+      increment: () => unwrap() + 1,
+    }));
 
     storeWithActions.increment();
     expect(storeWithActions.unwrap()).toBe(1);
-    expect(storeWithActions).not.toBe(store);
+    expect(storeWithActions).not.toBe(counter);
   });
 
   it("should support multiple actions", () => {
-    const storeWithActions = actions(store(0), {
-      increment: () => (value) => value + 1,
-      multiply: (factor: number) => (value) => value * factor,
-    });
+    const storeWithActions = actions(store(0), (unwrap) => ({
+      increment: () => unwrap() + 1,
+      multiply: (factor: number) => unwrap() * factor,
+    }));
 
     storeWithActions.increment();
     expect(storeWithActions.unwrap()).toBe(1);

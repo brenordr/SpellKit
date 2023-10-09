@@ -1,35 +1,28 @@
 import { Store } from "../store";
-import { isPromiseLike } from "../utils";
 
-type Action<T> = (currentValue: T, ...args: any[]) => T;
-type ActionGenerator<T> = (...args: any[]) => Action<T>;
-type Actions<T> = { [actionName: string]: ActionGenerator<T> };
+type Action<T, Args extends any[]> = (...args: Args) => T;
+type ActionsCreator<T, A extends { [key: string]: Action<T, any[]> }> = (
+  unwrap: () => T
+) => A;
+type StoreWithActions<T, A> = Store<T> & A;
 
-type StoreWithActions<T, A extends Actions<T>> = Store<T> & {
-  [K in keyof A]: (...args: Parameters<A[K]>) => void;
-};
-
-export function actions<T, A extends Actions<T>>(
+export function actions<T, A extends { [key: string]: Action<T, any[]> }>(
   store: Store<T>,
-  options: A
+  actionsCreator: ActionsCreator<T, A>
 ): StoreWithActions<T, A> {
-  const actionHandlers: Partial<Record<keyof A, (...args: any[]) => void>> = {};
+  const unwrap = () => store.unwrap();
 
-  for (const [actionName, generator] of Object.entries(options)) {
-    actionHandlers[actionName as keyof A] = async (...args: any[]) => {
-      const action = generator(...args);
-      const currentValue = store.unwrap();
+  const actionHandlers = actionsCreator(unwrap);
 
-      if (isPromiseLike(currentValue)) {
-        const resolvedValue = await currentValue;
-        const newValue = action(resolvedValue);
+  const actionHandlersWithPublish = Object.fromEntries(
+    Object.entries(actionHandlers).map(([key, action]) => [
+      key,
+      (...args: any[]) => {
+        const newValue = action(...args);
         store.publish(newValue);
-      } else {
-        const newValue = action(currentValue);
-        store.publish(newValue);
-      }
-    };
-  }
+      },
+    ])
+  );
 
-  return { ...store, ...actionHandlers } as StoreWithActions<T, A>;
+  return { ...store, ...actionHandlersWithPublish } as StoreWithActions<T, A>;
 }
