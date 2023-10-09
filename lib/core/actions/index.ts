@@ -1,28 +1,32 @@
 import { Store } from "../store";
 
-type Action<T, Args extends any[]> = (...args: Args) => T;
-type ActionsCreator<T, A extends { [key: string]: Action<T, any[]> }> = (
+type Action<T> = (...args: any[]) => T;
+type ActionsCreator<T, A extends { [key: string]: Action<T> }> = (
   unwrap: () => T
 ) => A;
-type StoreWithActions<T, A> = Store<T> & A;
+type Actions<T, A extends { [key: string]: Action<T> }> = {
+  [K in keyof A]: (...args: Parameters<A[K]>) => void;
+};
 
-export function actions<T, A extends { [key: string]: Action<T, any[]> }>(
+export function actions<T, A extends { [key: string]: Action<T> }>(
   store: Store<T>,
-  actionsCreator: ActionsCreator<T, A>
-): StoreWithActions<T, A> {
+  creator: ActionsCreator<T, A>
+): Actions<T, A> {
   const unwrap = () => store.unwrap();
 
-  const actionHandlers = actionsCreator(unwrap);
+  const actionHandlers = creator(unwrap);
 
-  const actionHandlersWithPublish = Object.fromEntries(
-    Object.entries(actionHandlers).map(([key, action]) => [
-      key,
-      (...args: any[]) => {
+  const actionHandlersWithPublish: Partial<Actions<T, A>> = {};
+
+  for (const key in actionHandlers) {
+    if (Object.prototype.hasOwnProperty.call(actionHandlers, key)) {
+      const action = actionHandlers[key];
+      actionHandlersWithPublish[key] = (...args: any[]) => {
         const newValue = action(...args);
         store.publish(newValue);
-      },
-    ])
-  );
+      };
+    }
+  }
 
-  return { ...store, ...actionHandlersWithPublish } as StoreWithActions<T, A>;
+  return actionHandlersWithPublish as Actions<T, A>;
 }
