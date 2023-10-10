@@ -37,7 +37,7 @@ describe("create", () => {
   });
 
   it("should support asynchronous initialization", async () => {
-    const asyncStore = create(
+    const asyncStore = create<number>(
       () => new Promise((resolve) => setTimeout(() => resolve(10), 100))
     );
     await asyncStore; // Await the store to resolve

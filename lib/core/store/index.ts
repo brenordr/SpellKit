@@ -2,13 +2,7 @@ import { Unwrappable } from "../@types";
 import { Channel, channel } from "../channel";
 import { isPromiseLike } from "../utils";
 
-export type Actions<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? T[K] : never;
-};
-
 export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
-
-type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
 
 export function store<T>(init: () => Promise<T>): Store<T>;
 export function store<T>(init: () => T): Store<T>;
@@ -32,6 +26,7 @@ export function store<T>(init: T | (() => T) | (() => Promise<T>)): Store<T> {
   let value: T;
   let resolved = false;
 
+  type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
   let resolveHydration: ResolveHydrationType<T> = () => {};
 
   const hydrationPromise = new Promise<T>((resolve) => {
