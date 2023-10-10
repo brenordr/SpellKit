@@ -1,7 +1,5 @@
 import { Action, Actions, ActionsCreator, actions } from "../actions";
-import { Store, store } from "../store";
-
-type AsyncStore<T> = Store<T | undefined>;
+import { AsyncStore, Store, store } from "../store";
 
 export function create<T, A extends { [key: string]: Action<T> } = {}>(
   init: () => PromiseLike<T>,

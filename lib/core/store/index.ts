@@ -5,8 +5,9 @@ import { isPromiseLike } from "../utils";
 export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
 export type ReadableStore<T> = Omit<Store<T>, keyof Publishable<T>>;
 export type WritableStore<T> = ReadableStore<T> & Publishable<T>;
+export type AsyncStore<T> = ReadableStore<T | undefined>;
 
-type StoreInitializer<T> = T | (() => T) | (() => Promise<T>);
+export type StoreInit<T> = T | (() => T) | (() => Promise<T>);
 
 export function store<T>(init: () => Promise<T>): Store<T>;
 export function store<T>(init: () => T): Store<T>;
@@ -27,7 +28,7 @@ export function store<T>(init: T): Store<T>;
  * // Create an asynchronous store
  * const asyncStore = store(() => new Promise(resolve => setTimeout(() => resolve(10), 1000)));
  */
-export function store<T>(init: StoreInitializer<T>): Store<T> {
+export function store<T>(init: StoreInit<T>): Store<T> {
   let value: T;
   let resolved = false;
 
