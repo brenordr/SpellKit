@@ -5,7 +5,7 @@ import { isPromiseLike } from "../utils";
 export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
 export type ReadableStore<T> = Omit<Store<T>, keyof Publishable<T>>;
 export type WritableStore<T> = ReadableStore<T> & Publishable<T>;
-export type AsyncStore<T> = ReadableStore<T | undefined>;
+export type AsyncStore<T> = ReadableStore<T | undefined> | Store<T | undefined>;
 
 export type StoreInit<T> = T | (() => T) | (() => Promise<T>);
 

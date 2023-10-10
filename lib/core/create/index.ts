@@ -38,9 +38,9 @@ export function create<T, A extends { [key: string]: Action<T> } = {}>(
  *
  * @example
  * // Creating a store with initial value and actions
- * const myStore = create(0, (unwrap) => ({
- *   increment: () => unwrap() + 1,
- *   decrement: () => unwrap() - 1,
+ * const myStore = create(0, (unwrap, publish) => ({
+ *   increment: () => { publish(unwrap() + 1) },
+ *   decrement: () => { publish(unwrap() - 1) },
  * }));
  */
 export function create<T, A extends { [key: string]: Action<T> }>(
