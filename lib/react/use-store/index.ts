@@ -1,9 +1,8 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { Publishable } from "../../core/@types";
-import { Store } from "../../core/store";
+import { ReadableStore } from "../../core/store";
 import { isPromiseLike } from "../../core/utils";
 
-export function useStore<T>(state: Omit<Store<T>, keyof Publishable<T>>): T {
+export function useStore<T>(state: ReadableStore<T>): T {
   let hydrated = useRef(false);
 
   const storeState = useSyncExternalStore(

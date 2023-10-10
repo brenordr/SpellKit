@@ -9,6 +9,7 @@ describe("store", () => {
 
   it("notifies subscribers when a value is published", () => {
     const testStore = store<number>(42);
+
     let value = 0;
 
     const mockFn = mock((v) => {

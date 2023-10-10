@@ -3,10 +3,16 @@ import { create } from ".";
 
 describe("create", () => {
   it("should create a store and actions, and allow actions to modify the store", () => {
-    const counter = create(0, (unwrap) => ({
-      increment: () => unwrap() + 1,
-      decrement: () => unwrap() - 1,
-      add: (amount: number) => unwrap() + amount,
+    const counter = create(0, (unwrap, publish) => ({
+      increment: () => {
+        publish(unwrap() + 1);
+      },
+      decrement: () => {
+        publish(unwrap() - 1);
+      },
+      add: (amount: number) => {
+        publish(unwrap() + amount);
+      },
     }));
 
     counter.increment();
@@ -20,8 +26,10 @@ describe("create", () => {
   });
 
   it("should allow actions with arguments", () => {
-    const counter = create(0, (unwrap) => ({
-      add: (amount: number) => unwrap() + amount,
+    const counter = create(0, (unwrap, publish) => ({
+      add: (amount: number) => {
+        publish(unwrap() + amount);
+      },
     }));
 
     counter.add(5);
@@ -37,8 +45,9 @@ describe("create", () => {
   });
 
   it("should support asynchronous initialization", async () => {
-    const asyncStore = create<number>(
-      () => new Promise((resolve) => setTimeout(() => resolve(10), 100))
+    const asyncStore = create(
+      (): Promise<number> =>
+        new Promise((resolve) => setTimeout(() => resolve(10), 100))
     );
     await asyncStore; // Await the store to resolve
     expect(asyncStore.unwrap()).toBe(10);
@@ -54,9 +63,13 @@ describe("create", () => {
   });
 
   it("should use the return value of actions to update the store", () => {
-    const mathStore = create(0, (unwrap) => ({
-      increment: () => unwrap() + 1,
-      multiply: (factor: number) => unwrap() * factor,
+    const mathStore = create(0, (unwrap, publish) => ({
+      increment: () => {
+        publish(unwrap() + 1);
+      },
+      multiply: (factor: number) => {
+        publish(unwrap() * factor);
+      },
     }));
 
     mathStore.multiply(2);

@@ -6,9 +6,13 @@ describe("actions", () => {
   it("should allow actions that modify the store", () => {
     const counter = store(0);
 
-    const counterActions = actions(counter, (unwrap) => ({
-      increment: () => unwrap() + 1,
-      decrement: () => unwrap() - 1,
+    const counterActions = actions(counter, (unwrap, publish) => ({
+      increment: () => {
+        publish(unwrap() + 1);
+      },
+      decrement: () => {
+        publish(unwrap() - 1);
+      },
     }));
 
     counterActions.increment();
@@ -21,8 +25,8 @@ describe("actions", () => {
   it("should allow actions with arguments", async () => {
     const counter = store(0);
 
-    const counterActions = actions(counter, (unwrap) => ({
-      add: (amount: number) => unwrap() + amount,
+    const counterActions = actions(counter, (unwrap, publish) => ({
+      add: (amount: number) => publish(unwrap() + amount),
     }));
 
     counterActions.add(5);
@@ -35,8 +39,10 @@ describe("actions", () => {
   it("should not affect the original store object", () => {
     const counter = store(0);
 
-    const counterActions = actions(counter, (unwrap) => ({
-      increment: () => unwrap() + 1,
+    const counterActions = actions(counter, (unwrap, publish) => ({
+      increment: () => {
+        publish(unwrap() + 1);
+      },
     }));
 
     counterActions.increment();
@@ -47,9 +53,13 @@ describe("actions", () => {
   it("should support multiple actions", () => {
     const counter = store(0);
 
-    const counterActions = actions(counter, (unwrap) => ({
-      increment: () => unwrap() + 1,
-      multiply: (factor: number) => unwrap() * factor,
+    const counterActions = actions(counter, (unwrap, publish) => ({
+      increment: () => {
+        publish(unwrap() + 1);
+      },
+      multiply: (factor: number) => {
+        publish(unwrap() * factor);
+      },
     }));
 
     counterActions.increment();
@@ -62,8 +72,10 @@ describe("actions", () => {
   it("toggle a boolean using a custom action", async () => {
     const lightSwitch = store(false);
 
-    const lightSwitchActions = actions(lightSwitch, (unwrap) => ({
-      toggle: () => !unwrap(),
+    const lightSwitchActions = actions(lightSwitch, (unwrap, publish) => ({
+      toggle: () => {
+        publish(!unwrap());
+      },
     }));
 
     lightSwitchActions.toggle();

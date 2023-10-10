@@ -20,8 +20,9 @@ describe("computed", () => {
   });
 
   it("notifies subscribers when parent states change", () => {
-    const a1 = create<number>(0);
-    const a2 = create<string>("0");
+    const a1 = create(0);
+    const a2 = create("0");
+
     const mockFn = mock(() => {});
 
     const computedValue = computed(a1, a2, (v1, v2) => v1 + v2);
@@ -37,13 +38,17 @@ describe("computed", () => {
 
   it("toggle a derived boolean when parents call custom action", () => {
     const darkMode = store(false);
-    const darkModeActions = actions(darkMode, (unwrap) => ({
-      toggle: () => !unwrap(),
+    const darkModeActions = actions(darkMode, (unwrap, publish) => ({
+      toggle: () => {
+        publish(!unwrap());
+      },
     }));
 
     const systemEnabled = store(false);
-    const systemEnabledActions = actions(systemEnabled, (unwrap) => ({
-      toggle: () => !unwrap(),
+    const systemEnabledActions = actions(systemEnabled, (unwrap, publish) => ({
+      toggle: () => {
+        publish(!unwrap());
+      },
     }));
 
     const lightMode = computed(darkMode, systemEnabled, (dark, system) => {

@@ -1,33 +1,24 @@
-import { Actions, ActionsCreator, actions } from "../actions";
+import { Action, Actions, ActionsCreator, actions } from "../actions";
 import { Store, store } from "../store";
 
 type AsyncStore<T> = Store<T | undefined>;
 
-export function create<
-  T,
-  A extends { [key: string]: (...args: any[]) => T } = {}
->(
+export function create<T, A extends { [key: string]: Action<T> } = {}>(
   init: () => PromiseLike<T>,
   actionsCreator?: ActionsCreator<T, A>
 ): AsyncStore<T> & Actions<T, A>;
 
-export function create<
-  T,
-  A extends { [key: string]: (...args: any[]) => T } = {}
->(
+export function create<T, A extends { [key: string]: Action<T> } = {}>(
   init: () => T,
   actionsCreator?: ActionsCreator<T, A>
 ): Store<T> & Actions<T, A>;
 
-export function create<
-  T,
-  A extends { [key: string]: (...args: any[]) => T } = {}
->(init: T, actionsCreator?: ActionsCreator<T, A>): Store<T> & Actions<T, A>;
+export function create<T, A extends { [key: string]: Action<T> } = {}>(
+  init: T,
+  actionsCreator?: ActionsCreator<T, A>
+): Store<T> & Actions<T, A>;
 
-export function create<
-  T,
-  A extends { [key: string]: (...args: any[]) => T } = {}
->(
+export function create<T, A extends { [key: string]: Action<T> } = {}>(
   init: T | (() => T) | (() => PromiseLike<T>),
   actionsCreator?: ActionsCreator<T, A>
 ): Store<T> & Actions<T, A>;
@@ -54,10 +45,7 @@ export function create<
  *   decrement: () => unwrap() - 1,
  * }));
  */
-export function create<
-  T,
-  A extends { [key: string]: (...args: any[]) => T } = {}
->(
+export function create<T, A extends { [key: string]: Action<T> }>(
   init: T | (() => T) | (() => PromiseLike<T>),
   actionsCreator?: ActionsCreator<T, A>
 ): Store<T> & Actions<T, A> {

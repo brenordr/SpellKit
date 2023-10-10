@@ -1,12 +1,17 @@
-import { Unwrappable } from "../@types";
+import { Publishable, Unwrappable } from "../@types";
 import { Channel, channel } from "../channel";
 import { isPromiseLike } from "../utils";
 
 export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
+export type ReadableStore<T> = Omit<Store<T>, keyof Publishable<T>>;
+export type WritableStore<T> = ReadableStore<T> & Publishable<T>;
+
+type StoreInitializer<T> = T | (() => T) | (() => Promise<T>);
 
 export function store<T>(init: () => Promise<T>): Store<T>;
 export function store<T>(init: () => T): Store<T>;
 export function store<T>(init: T): Store<T>;
+
 /**
  * State type definition.
  *
@@ -22,7 +27,7 @@ export function store<T>(init: T): Store<T>;
  * // Create an asynchronous store
  * const asyncStore = store(() => new Promise(resolve => setTimeout(() => resolve(10), 1000)));
  */
-export function store<T>(init: T | (() => T) | (() => Promise<T>)): Store<T> {
+export function store<T>(init: StoreInitializer<T>): Store<T> {
   let value: T;
   let resolved = false;
 

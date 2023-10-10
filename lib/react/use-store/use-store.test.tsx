@@ -12,8 +12,10 @@ describe("useStore", () => {
   });
 
   it("should return updated state after actions", () => {
-    const counter = create(0, (unwrap) => ({
-      increment: () => unwrap() + 1,
+    const counter = create(0, (unwrap, publish) => ({
+      increment: () => {
+        publish(unwrap() + 1);
+      },
     }));
 
     const { result } = renderHook(() => useStore(counter));
@@ -46,8 +48,10 @@ describe("useStore", () => {
     const asyncStore = create(
       (): Promise<number> =>
         new Promise((resolve) => setTimeout(() => resolve(10), 100)),
-      (unwrap) => ({
-        increment: () => unwrap() + 1,
+      (unwrap, publish) => ({
+        increment: () => {
+          publish(unwrap() + 1);
+        },
       })
     );
 
