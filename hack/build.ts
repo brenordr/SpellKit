@@ -14,25 +14,34 @@ async function build() {
   };
 
   // Core
-  await Bun.build({
+  const core = Bun.build({
     ...commonOptions,
   });
 
   // React specific
-  await Bun.build({
+  const react = Bun.build({
     ...commonOptions,
     entrypoints: ["./lib/react/index.ts"],
     outdir: "./dist/esm/react",
   });
 
   // Middleware specific
-  await Bun.build({
+  const middleware = Bun.build({
     ...commonOptions,
     entrypoints: ["./lib/middleware/index.ts"],
     outdir: "./dist/esm/middleware",
   });
 
-  // ... Do this for react and middleware too
+  const success = (await Promise.all([core, react, middleware])).reduce(
+    (acc, cur) => {
+      return acc && cur.success;
+    },
+    true
+  );
+
+  if (!success) {
+    throw new Error("Build failed");
+  }
 }
 
 build();

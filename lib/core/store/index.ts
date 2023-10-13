@@ -1,4 +1,3 @@
-import { isPromise } from "util/types";
 import {
   Publishable,
   Subscribable,
@@ -6,7 +5,7 @@ import {
   Unwrappable,
 } from "../@types";
 import { Channel, channel } from "../channel";
-import { isFunction } from "../utils";
+import { isFunction, isPromiseLike } from "../utils";
 
 export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
 export type ReadableStore<T> = Omit<Store<T>, keyof Publishable<T>>;
@@ -74,7 +73,7 @@ export function store<T>(
       asyncStore.subscribe
     );
 
-    if (!isPromise(init)) {
+    if (!isPromiseLike(init)) {
       ready = true;
     } else {
       initPromise = new Promise<T>((resolve) => {
