@@ -41,7 +41,10 @@ describe("store", () => {
   });
 
   it("handles initial value from async function", async () => {
-    const testStore = store(async () => 42);
+    const testStore = store(0, async (unwrap, publish) => {
+      publish(await Promise.resolve(42));
+      return () => {};
+    });
     let value = 0;
 
     const mockFn = mock((v) => {
@@ -60,7 +63,10 @@ describe("store", () => {
   it("can unwrap value after async resolution", async () => {
     // const testStore = store(async () => 42);
 
-    const testStore = store(async () => 42);
+    const testStore = store(0, async (unwrap, publish) => {
+      publish(await Promise.resolve(42));
+      return () => {};
+    });
 
     // Wait for Promise to resolve
     await testStore;
@@ -90,7 +96,11 @@ describe("store", () => {
   });
 
   it("should await for await and then update the store, the next wait should return the updated value", async () => {
-    const testStore = store(async () => 42);
+    const testStore = store(0, async (_, set) => {
+      // Wait for Promise to resolve after 1 second
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      set(42);
+    });
 
     const value = await testStore;
 
@@ -101,5 +111,21 @@ describe("store", () => {
     const newValue = await testStore;
 
     expect(newValue).toBe(100);
+  });
+
+  it("should update value when publish is called with a function", () => {
+    const testStore = store<number>(42);
+    let value = 0;
+
+    const mockFn = mock((v) => {
+      value = v;
+    });
+
+    testStore.subscribe(mockFn);
+    testStore.publish(testStore.unwrap() + 1);
+
+    expect(mockFn).toHaveBeenCalled();
+    expect(value).toBe(43);
+    expect(testStore.unwrap()).toBe(43);
   });
 });

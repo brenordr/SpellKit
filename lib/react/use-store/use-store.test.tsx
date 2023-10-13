@@ -1,18 +1,20 @@
 import { act, renderHook } from "@testing-library/react-hooks";
 import { describe, expect, it } from "bun:test";
-import { create } from "../../core/create"; // Adjust the import path according to your project structure
+import { actions, store } from "../../core";
 import { useStore } from "./";
 
 describe("useStore", () => {
   it("should return initial state immediately", () => {
-    const initialStore = create(0);
+    const initialStore = store(0);
     const { result } = renderHook(() => useStore(initialStore));
 
     expect(result.current).toBe(0);
   });
 
   it("should return updated state after actions", () => {
-    const counter = create(0, (unwrap, publish) => ({
+    const counter = store(0);
+
+    const { increment } = actions(counter, (unwrap, publish) => ({
       increment: () => {
         publish(unwrap() + 1);
       },
@@ -21,15 +23,22 @@ describe("useStore", () => {
     const { result } = renderHook(() => useStore(counter));
 
     act(() => {
-      counter.increment();
+      increment();
     });
 
     expect(result.current).toBe(1);
   });
 
   it("should handle asynchronous initialization", async () => {
-    const asyncStore = create<number>(
-      () => new Promise((resolve) => setTimeout(() => resolve(10), 100))
+    const asyncStore = store<number | undefined>(
+      undefined,
+      async (unwrap, publish) => {
+        const value = await new Promise<number>((resolve) =>
+          setTimeout(() => resolve(10), 100)
+        );
+        publish(value);
+        return () => {};
+      }
     );
 
     const { result, waitForNextUpdate } = renderHook(() => {
@@ -45,18 +54,25 @@ describe("useStore", () => {
   });
 
   it("should increment an asynchronous store", async () => {
-    const asyncStore = create(
-      (): Promise<number> =>
-        new Promise((resolve) => setTimeout(() => resolve(10), 100)),
-      (unwrap, publish) => ({
-        increment: () => {
-          publish(unwrap() + 1);
-        },
-      })
+    const counter = store<number | undefined>(
+      undefined,
+      async (unwrap, publish) => {
+        const value = await new Promise<number>((resolve) =>
+          setTimeout(() => resolve(10), 100)
+        );
+        publish(value);
+        return () => {};
+      }
     );
 
+    const { increment } = actions(counter, (unwrap, publish) => ({
+      increment: () => {
+        publish((unwrap() || 0) + 1);
+      },
+    }));
+
     const { result, waitForNextUpdate } = renderHook(() => {
-      const value = useStore(asyncStore);
+      const value = useStore(counter);
       return value;
     });
 
@@ -65,5 +81,11 @@ describe("useStore", () => {
     await waitForNextUpdate();
 
     expect(result.current).toBe(10);
+
+    act(() => {
+      increment();
+    });
+
+    expect(result.current).toBe(11);
   });
 });

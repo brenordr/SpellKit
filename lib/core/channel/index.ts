@@ -1,20 +1,11 @@
-import { Publishable, Subscribable } from "../@types";
+import { Publishable, Subscribable, Subscriber } from "../@types";
 
 export interface Channel<T> extends Publishable<T>, Subscribable<T> {
   close: () => void;
 }
 
-/**
- * Creates a new channel for publishing and subscribing to values.
- *
- * @template T - The type of values that will be published and received in the channel.
- *
- * @returns {Channel<T>} An object containing methods to `publish` values and `subscribe` to changes.
- */
 export const channel = <T>(): Channel<T> => {
-  // const subscribers: Array<(value: T) => void> = [];
-
-  const subscribers = new Set<(value: T) => void>();
+  const subscribers = new Set<Subscriber<T>>();
 
   let closed = false;
 
@@ -27,14 +18,14 @@ export const channel = <T>(): Channel<T> => {
       subscribers.forEach((fn) => fn(value));
     },
 
-    subscribe: (fn: (value: T) => void) => {
+    subscribe: (fn: Subscriber<T>) => {
       if (closed) {
         throw new Error(`Cannot subscribe to a closed channel`);
       }
 
       subscribers.add(fn);
 
-      return () => {
+      return (): void => {
         subscribers.delete(fn);
       };
     },

@@ -1,91 +1,91 @@
-import { Publishable, Unwrappable } from "../@types";
+import { isPromise } from "util/types";
+import {
+  Publishable,
+  Subscribable,
+  Unsubscriber,
+  Unwrappable,
+} from "../@types";
 import { Channel, channel } from "../channel";
-import { isPromiseLike } from "../utils";
+import { isFunction } from "../utils";
 
 export interface Store<T> extends Channel<T>, Unwrappable<T>, PromiseLike<T> {}
 export type ReadableStore<T> = Omit<Store<T>, keyof Publishable<T>>;
 export type WritableStore<T> = ReadableStore<T> & Publishable<T>;
-export type AsyncStore<T> = ReadableStore<T | undefined> | Store<T | undefined>;
 
-export type StoreInit<T> = T | (() => T) | (() => Promise<T>);
+export type StoreInit<T> = (
+  unwrap: Unwrappable<T>["unwrap"],
+  publish: Publishable<T>["publish"],
+  subscribe: Subscribable<T>["subscribe"]
+) => Unsubscriber | Promise<Unsubscriber | void> | void;
 
-export function store<T>(init: () => Promise<T>): Store<T>;
-export function store<T>(init: () => T): Store<T>;
-export function store<T>(init: T): Store<T>;
+export function store<T>(init: T | undefined): Store<T>;
+export function store<T>(
+  init: T | undefined,
+  storeInit: StoreInit<T>
+): Store<T>;
 
-/**
- * State type definition.
- *
- * @template T The type of values that the state holds.
- * @param {T | (() => T) | (() => Promise<T>)} init - Initial value.
- * @returns {Store<T>} An asynchronous store object.
- *
- * @example
- * // Create a basic state with an initial value
- * const myState = store(10);
- *
- * @example
- * // Create an asynchronous store
- * const asyncStore = store(() => new Promise(resolve => setTimeout(() => resolve(10), 1000)));
- */
-export function store<T>(init: StoreInit<T>): Store<T> {
+export function store<T>(
+  init: T | undefined,
+  storeInit?: StoreInit<T>
+): Store<T> {
   let value: T;
-  let resolved = false;
 
-  type ResolveHydrationType<T> = (value: T | PromiseLike<T>) => void;
-  let resolveHydration: ResolveHydrationType<T> = () => {};
+  if (init !== undefined) {
+    value = init;
+  }
 
-  const hydrationPromise = new Promise<T>((resolve) => {
-    resolveHydration = resolve;
-  });
-
+  let ready = false;
+  let initPromise: Promise<T> | undefined;
   const innerChannel = channel<T>();
   const { publish, subscribe, ...innerChannelFns } = innerChannel;
 
-  const subscribeWrapper = (fn: (value: T) => void) => {
+  // When a store is subscribed it will always notify the subscriber of the current value
+  // in comparison to a channel that will only notify the subscriber of new values after a subsequent publish call
+  const subscribeAndNotify = (fn: (value: T) => void) => {
     fn(value);
     return subscribe(fn);
   };
 
+  const then: Store<T>["then"] = (onfulfilled, onrejected) => {
+    if (!ready && initPromise) {
+      return initPromise.then(onfulfilled, onrejected);
+    }
+
+    return new Promise<T>((resolve) => {
+      resolve(value);
+    }).then(onfulfilled, onrejected);
+  };
+
   const asyncStore: Store<T> = {
     ...innerChannelFns,
-    publish: (newValue: T) => {
+    unwrap: () => value,
+    subscribe: (fn) => subscribeAndNotify(fn),
+    publish: (newValue) => {
       value = newValue;
       publish(newValue);
     },
-    subscribe: (fn) => subscribeWrapper(fn),
-    unwrap: () => value,
-    then: (onfulfilled, onrejected) => {
-      if (!resolved) {
-        return hydrationPromise.then(onfulfilled, onrejected);
-      }
-
-      // TODO: This creates a fresh promise that returns the value. May not be ideal.
-      // we can probably just return the value directly?
-      return new Promise<T>((resolve) => {
-        resolve(value);
-      }).then(onfulfilled, onrejected);
-    },
+    then,
   };
 
-  const initialize = (initializer: T | PromiseLike<T>) => {
-    if (isPromiseLike(initializer)) {
-      initializer.then((initialValue) => {
-        asyncStore.publish(initialValue);
-        resolveHydration(initialValue);
-        resolved = true;
-      });
+  if (storeInit && isFunction(storeInit)) {
+    const init = storeInit(
+      asyncStore.unwrap,
+      asyncStore.publish,
+      asyncStore.subscribe
+    );
+
+    if (!isPromise(init)) {
+      ready = true;
     } else {
-      asyncStore.publish(initializer);
-      resolveHydration(initializer);
-      resolved = true;
+      initPromise = new Promise<T>((resolve) => {
+        init.then((unsubscriber) => {
+          ready = true;
+          resolve(value);
+        });
+      });
     }
-  };
-
-  if (typeof init === "function") {
-    initialize((init as (() => T) | (() => Promise<T>))());
   } else {
-    initialize(init);
+    ready = true;
   }
 
   return asyncStore;

@@ -42,13 +42,11 @@ export function persist<T>(
     deserialize = JSON.parse,
   } = options;
 
-  const asyncStore = store<T>(async () => {
+  const asyncStore = store<T>(storeRef.unwrap(), async (unwrap, publish) => {
     const value = storage.getItem(key);
     if (value !== null) {
-      return deserialize(value);
+      publish(deserialize(value));
     }
-
-    return storeRef.unwrap();
   });
 
   if (storage.subscribe) {
