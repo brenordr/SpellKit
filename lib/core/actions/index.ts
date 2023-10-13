@@ -11,13 +11,13 @@ export type ActionsCreator<T, A extends Action> = (
   subscribe: Subscribable<T>["subscribe"]
 ) => A;
 
-export interface Actions<A extends { [key: string]: (...args: any[]) => any }>
-  extends Record<string, (...args: any[]) => ReturnType<A[keyof A]>> {}
+// export interface Actions<A extends { [key: string]: (...args: any[]) => any }>
+//   extends Record<string, (...args: any[]) => ReturnType<A[keyof A]>> {}
 
 export function actions<T, A extends Action>(
   store: Store<T>,
   creator: ActionsCreator<T, A>
-): Actions<A> {
+): A {
   const actionHandlers = creator(store.unwrap, store.publish, store.subscribe);
-  return actionHandlers as Actions<A>;
+  return actionHandlers as A;
 }
